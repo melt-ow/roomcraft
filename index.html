@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ROOMCRAFT - サービス企画書</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary: #2D5BFF;
+      --primary-light: #EEF2FF;
+      --primary-dark: #1a3cb8;
+      --accent: #FF6B35;
+      --dark: #1a1a2e;
+      --gray: #6B7280;
+      --light-gray: #F3F4F6;
+      --white: #FFFFFF;
+    }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      color: var(--dark);
+      line-height: 1.8;
+      overflow-x: hidden;
+    }
+
+    /* ========== HERO ========== */
+    .hero {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--white);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(45,91,255,0.15) 0%, transparent 70%);
+      top: -100px;
+      right: -100px;
+      border-radius: 50%;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(255,107,53,0.1) 0%, transparent 70%);
+      bottom: -50px;
+      left: -50px;
+      border-radius: 50%;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+      padding: 2rem;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 0.4rem 1.2rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 2rem;
+      letter-spacing: 0.05em;
+    }
+
+    .hero h1 {
+      font-size: 4rem;
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, #fff 0%, #a8c0ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-tagline {
+      font-size: 1.4rem;
+      font-weight: 300;
+      opacity: 0.9;
+      margin-bottom: 1rem;
+    }
+
+    .hero-sub {
+      font-size: 1rem;
+      opacity: 0.6;
+      margin-bottom: 3rem;
+    }
+
+    .hero-arrow {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      animation: bounce 2s infinite;
+      opacity: 0.5;
+      font-size: 1.5rem;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(10px); }
+    }
+
+    /* ========== SECTION COMMON ========== */
+    section {
+      padding: 100px 2rem;
+    }
+
+    .section-label {
+      display: inline-block;
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 0.3rem 1rem;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-size: 2.2rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+    }
+
+    .section-desc {
+      font-size: 1.05rem;
+      color: var(--gray);
+      max-width: 600px;
+      margin-bottom: 3rem;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* ========== PROBLEM ========== */
+    .problem {
+      background: var(--light-gray);
+    }
+
+    .problem-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 2rem;
+    }
+
+    .problem-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    }
+
+    .problem-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .problem-card h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.8rem;
+    }
+
+    .problem-card p {
+      font-size: 0.9rem;
+      color: var(--gray);
+      line-height: 1.7;
+    }
+
+    /* ========== SOLUTION (Before/After) ========== */
+    .solution {
+      background: var(--white);
+    }
+
+    .ba-container {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .ba-box {
+      border-radius: 20px;
+      padding: 2.5rem;
+      text-align: center;
+    }
+
+    .ba-before {
+      background: #FEF2F2;
+      border: 2px solid #FECACA;
+    }
+
+    .ba-after {
+      background: #EEF2FF;
+      border: 2px solid #C7D2FE;
+    }
+
+    .ba-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+    }
+
+    .ba-before .ba-label { color: #DC2626; }
+    .ba-after .ba-label { color: var(--primary); }
+
+    .ba-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+
+    .ba-box h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.8rem;
+    }
+
+    .ba-box p {
+      font-size: 0.9rem;
+      color: var(--gray);
+    }
+
+    .ba-arrow {
+      font-size: 2.5rem;
+      color: var(--primary);
+      font-weight: 900;
+    }
+
+    /* ========== FLOW ========== */
+    .flow {
+      background: linear-gradient(180deg, var(--light-gray) 0%, var(--white) 100%);
+    }
+
+    .flow-steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      position: relative;
+    }
+
+    .flow-step {
+      text-align: center;
+      position: relative;
+    }
+
+    .flow-num {
+      width: 56px;
+      height: 56px;
+      background: var(--primary);
+      color: var(--white);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      font-weight: 900;
+      margin: 0 auto 1.2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .flow-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 28px;
+      left: calc(50% + 28px);
+      width: calc(100% - 56px);
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), rgba(45,91,255,0.2));
+      z-index: 0;
+    }
+
+    .flow-visual {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 2rem 1.5rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+      min-height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.5rem;
+    }
+
+    .flow-step h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .flow-step p {
+      font-size: 0.8rem;
+      color: var(--gray);
+    }
+
+    /* ========== MOCKUP ========== */
+    .mockup {
+      background: var(--dark);
+      color: var(--white);
+    }
+
+    .mockup .section-label {
+      background: rgba(45,91,255,0.2);
+    }
+
+    .mockup .section-desc {
+      color: rgba(255,255,255,0.5);
+    }
+
+    .mock-screens {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    .mock-screen {
+      background: #252540;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .mock-browser-bar {
+      background: #1e1e36;
+      padding: 0.8rem 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .mock-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .mock-dot.red { background: #FF5F57; }
+    .mock-dot.yellow { background: #FEBC2E; }
+    .mock-dot.green { background: #28C840; }
+
+    .mock-url {
+      background: #2a2a4a;
+      border-radius: 6px;
+      padding: 0.3rem 1rem;
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.4);
+      margin-left: 0.5rem;
+      flex: 1;
+    }
+
+    .mock-content {
+      padding: 2rem;
+      min-height: 300px;
+    }
+
+    .mock-label {
+      font-size: 0.75rem;
+      color: var(--primary);
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+
+    /* Screen 1: Upload */
+    .mock-upload-area {
+      border: 2px dashed rgba(255,255,255,0.15);
+      border-radius: 12px;
+      padding: 2.5rem;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .mock-upload-area .icon { font-size: 2.5rem; margin-bottom: 0.8rem; }
+    .mock-upload-area p { font-size: 0.85rem; color: rgba(255,255,255,0.4); }
+    .mock-upload-area .main-text { color: rgba(255,255,255,0.7); font-weight: 500; margin-bottom: 0.3rem; }
+
+    .mock-form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+      margin-top: 1rem;
+    }
+
+    .mock-input {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 0.7rem 1rem;
+      color: rgba(255,255,255,0.3);
+      font-size: 0.8rem;
+    }
+
+    .mock-btn {
+      background: var(--primary);
+      border: none;
+      border-radius: 8px;
+      padding: 0.8rem;
+      color: white;
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin-top: 1rem;
+      width: 100%;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+    }
+
+    /* Screen 2: 3D View */
+    .mock-3d-view {
+      background: linear-gradient(135deg, #1a1a3e 0%, #2a2a5e 100%);
+      border-radius: 12px;
+      min-height: 200px;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+
+    .mock-room {
+      position: absolute;
+      inset: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mock-room-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 30px 30px;
+    }
+
+    .mock-room-label {
+      color: rgba(255,255,255,0.15);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+    }
+
+    .mock-furniture-item {
+      position: absolute;
+      background: rgba(45,91,255,0.3);
+      border: 1px solid rgba(45,91,255,0.5);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .mock-toolbar {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .mock-tool {
+      background: rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 0.5rem 0.8rem;
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.5);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .mock-tool.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    /* Screen 3: Furniture */
+    .mock-furniture-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.8rem;
+    }
+
+    .mock-furn-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .mock-furn-card .icon { font-size: 1.8rem; margin-bottom: 0.5rem; }
+    .mock-furn-card .name { font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-bottom: 0.3rem; }
+    .mock-furn-card .size { font-size: 0.65rem; color: rgba(255,255,255,0.3); }
+
+    .mock-furn-card.selected {
+      border-color: var(--primary);
+      background: rgba(45,91,255,0.1);
+    }
+
+    /* Screen 4: Share */
+    .mock-share-preview {
+      background: linear-gradient(135deg, #1a1a3e, #2a2a5e);
+      border-radius: 12px;
+      height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .mock-share-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: var(--accent);
+      color: white;
+      font-size: 0.6rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 50px;
+      font-weight: 700;
+    }
+
+    .mock-share-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .mock-share-row {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      background: rgba(255,255,255,0.05);
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+    }
+
+    .mock-share-row .icon { font-size: 1.2rem; }
+    .mock-share-row .text { font-size: 0.8rem; color: rgba(255,255,255,0.6); }
+
+    /* ========== TARGET ========== */
+    .target {
+      background: var(--white);
+    }
+
+    .target-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    .target-card {
+      border: 2px solid var(--light-gray);
+      border-radius: 20px;
+      padding: 2.5rem;
+      transition: border-color 0.3s;
+    }
+
+    .target-card:hover {
+      border-color: var(--primary);
+    }
+
+    .target-card .icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .target-card h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.8rem;
+    }
+
+    .target-card ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .target-card ul li {
+      font-size: 0.9rem;
+      color: var(--gray);
+      padding: 0.3rem 0;
+      padding-left: 1.2rem;
+      position: relative;
+    }
+
+    .target-card ul li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    /* ========== VALUE ========== */
+    .value {
+      background: var(--primary-light);
+    }
+
+    .value-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+    }
+
+    .value-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    }
+
+    .value-num {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .value-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .value-card p {
+      font-size: 0.85rem;
+      color: var(--gray);
+    }
+
+    /* ========== FOOTER ========== */
+    footer {
+      background: var(--dark);
+      color: rgba(255,255,255,0.4);
+      text-align: center;
+      padding: 3rem 2rem;
+      font-size: 0.85rem;
+    }
+
+    footer .logo {
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: var(--white);
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.1em;
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 2.5rem; }
+      .hero-tagline { font-size: 1.1rem; }
+      .problem-grid, .flow-steps { grid-template-columns: 1fr; }
+      .ba-container { grid-template-columns: 1fr; }
+      .ba-arrow { transform: rotate(90deg); text-align: center; }
+      .mock-screens { grid-template-columns: 1fr; }
+      .target-grid { grid-template-columns: 1fr; }
+      .value-grid { grid-template-columns: 1fr; }
+      .flow-step::after { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">SERVICE CONCEPT 2026</div>
+      <h1>ROOMCRAFT</h1>
+      <p class="hero-tagline">間取り図から、歩ける部屋へ。</p>
+      <p class="hero-sub">不動産会社向け 3Dバーチャル内見プラットフォーム</p>
+    </div>
+    <div class="hero-arrow">&#9660;</div>
+  </section>
+
+  <!-- ===== PROBLEM ===== -->
+  <section class="problem">
+    <div class="container">
+      <span class="section-label">PROBLEM</span>
+      <h2 class="section-title">間取り図だけでは伝わらない</h2>
+      <p class="section-desc">不動産業界が抱える「内見前の課題」</p>
+
+      <div class="problem-grid">
+        <div class="problem-card">
+          <div class="problem-icon">📐</div>
+          <h3>図面では空間がわからない</h3>
+          <p>2Dの間取り図では天井高や開放感など、実際の空間の雰囲気が全く伝わらない</p>
+        </div>
+        <div class="problem-card">
+          <div class="problem-icon">🏃</div>
+          <h3>内見の手間とコスト</h3>
+          <p>現地に行かないと雰囲気がわからず、顧客も営業も無駄足が多い</p>
+        </div>
+        <div class="problem-card">
+          <div class="problem-icon">🛋️</div>
+          <h3>家具を置いた想像ができない</h3>
+          <p>空室の状態では生活のイメージが湧かず、意思決定が遅れる</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SOLUTION ===== -->
+  <section class="solution">
+    <div class="container">
+      <span class="section-label">SOLUTION</span>
+      <h2 class="section-title">ROOMCRAFTが変えること</h2>
+      <p class="section-desc">図面をアップするだけで、歩ける3D空間が生まれる</p>
+
+      <div class="ba-container">
+        <div class="ba-box ba-before">
+          <div class="ba-label">BEFORE</div>
+          <div class="ba-icon">📄</div>
+          <h3>2D間取り図を見せるだけ</h3>
+          <p>「広さのイメージが湧かない」<br>「家具入るかな...」<br>「とりあえず現地行くしかない」</p>
+        </div>
+
+        <div class="ba-arrow">&#10132;</div>
+
+        <div class="ba-box ba-after">
+          <div class="ba-label">AFTER</div>
+          <div class="ba-icon">🏠</div>
+          <h3>3Dで歩いて内見できる</h3>
+          <p>「こんな広さなんだ！」<br>「ソファここに置けるね」<br>「これなら申し込みたい」</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FLOW ===== -->
+  <section class="flow">
+    <div class="container">
+      <span class="section-label">USER FLOW</span>
+      <h2 class="section-title">使い方はシンプル</h2>
+      <p class="section-desc">不動産会社の担当者が、たった4ステップで3D内見を提供</p>
+
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="flow-num">1</div>
+          <div class="flow-visual">📤</div>
+          <h3>図面をアップロード</h3>
+          <p>間取り図（画像 or PDF）をドラッグ&ドロップ</p>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">2</div>
+          <div class="flow-visual">⚙️</div>
+          <h3>部屋情報を入力</h3>
+          <p>部屋数・面積・天井高などの基本情報を設定</p>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">3</div>
+          <div class="flow-visual">🧊</div>
+          <h3>3D空間が生成</h3>
+          <p>AIが図面を解析し、リアルな3D空間を自動構築</p>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">4</div>
+          <div class="flow-visual">🛋️</div>
+          <h3>家具を配置</h3>
+          <p>プリセット家具を選んでドラッグ&ドロップで配置</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== MOCKUP ===== -->
+  <section class="mockup">
+    <div class="container">
+      <span class="section-label">SCREENS</span>
+      <h2 class="section-title">画面イメージ</h2>
+      <p class="section-desc">主要な4画面の構成</p>
+
+      <div class="mock-screens">
+        <!-- Screen 1: Upload -->
+        <div class="mock-screen">
+          <div class="mock-browser-bar">
+            <div class="mock-dot red"></div>
+            <div class="mock-dot yellow"></div>
+            <div class="mock-dot green"></div>
+            <div class="mock-url">roomcraft.app/upload</div>
+          </div>
+          <div class="mock-content">
+            <div class="mock-label">STEP 1 - 図面アップロード</div>
+            <div class="mock-upload-area">
+              <div class="icon">📁</div>
+              <p class="main-text">間取り図をドラッグ&ドロップ</p>
+              <p>PDF, PNG, JPG 対応</p>
+            </div>
+            <div class="mock-form-row">
+              <div class="mock-input">間取り: 2LDK</div>
+              <div class="mock-input">面積: 65 m²</div>
+            </div>
+            <div class="mock-form-row">
+              <div class="mock-input">天井高: 2.5 m</div>
+              <div class="mock-input">階数: 3F</div>
+            </div>
+            <div class="mock-btn">3D空間を生成する</div>
+          </div>
+        </div>
+
+        <!-- Screen 2: 3D View -->
+        <div class="mock-screen">
+          <div class="mock-browser-bar">
+            <div class="mock-dot red"></div>
+            <div class="mock-dot yellow"></div>
+            <div class="mock-dot green"></div>
+            <div class="mock-url">roomcraft.app/view/room-3f</div>
+          </div>
+          <div class="mock-content">
+            <div class="mock-label">STEP 3 - 3Dビュー</div>
+            <div class="mock-3d-view">
+              <div class="mock-room">
+                <div class="mock-room-grid"></div>
+                <div class="mock-room-label">3D WALKTHROUGH VIEW</div>
+                <div class="mock-furniture-item" style="width:50px;height:35px;bottom:20px;left:20px;">🛋️</div>
+                <div class="mock-furniture-item" style="width:30px;height:30px;top:15px;right:20px;">🪑</div>
+                <div class="mock-furniture-item" style="width:40px;height:25px;bottom:20px;right:40px;">📺</div>
+              </div>
+            </div>
+            <div class="mock-toolbar">
+              <div class="mock-tool active">👁️ 一人称</div>
+              <div class="mock-tool">🗺️ 俯瞰</div>
+              <div class="mock-tool">📐 計測</div>
+              <div class="mock-tool">📷 撮影</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Screen 3: Furniture -->
+        <div class="mock-screen">
+          <div class="mock-browser-bar">
+            <div class="mock-dot red"></div>
+            <div class="mock-dot yellow"></div>
+            <div class="mock-dot green"></div>
+            <div class="mock-url">roomcraft.app/view/room-3f/furniture</div>
+          </div>
+          <div class="mock-content">
+            <div class="mock-label">STEP 4 - 家具プリセット</div>
+            <div class="mock-furniture-grid">
+              <div class="mock-furn-card selected">
+                <div class="icon">🛋️</div>
+                <div class="name">3人掛けソファ</div>
+                <div class="size">W180 x D85</div>
+              </div>
+              <div class="mock-furn-card">
+                <div class="icon">🛏️</div>
+                <div class="name">ダブルベッド</div>
+                <div class="size">W140 x D200</div>
+              </div>
+              <div class="mock-furn-card">
+                <div class="icon">🪑</div>
+                <div class="name">ダイニングセット</div>
+                <div class="size">W120 x D80</div>
+              </div>
+              <div class="mock-furn-card">
+                <div class="icon">📺</div>
+                <div class="name">TVボード</div>
+                <div class="size">W150 x D40</div>
+              </div>
+              <div class="mock-furn-card">
+                <div class="icon">📚</div>
+                <div class="name">本棚</div>
+                <div class="size">W80 x D30</div>
+              </div>
+              <div class="mock-furn-card">
+                <div class="icon">🗄️</div>
+                <div class="name">クローゼット</div>
+                <div class="size">W120 x D60</div>
+              </div>
+            </div>
+            <div class="mock-btn">選択した家具を配置する</div>
+          </div>
+        </div>
+
+        <!-- Screen 4: Share -->
+        <div class="mock-screen">
+          <div class="mock-browser-bar">
+            <div class="mock-dot red"></div>
+            <div class="mock-dot yellow"></div>
+            <div class="mock-dot green"></div>
+            <div class="mock-url">roomcraft.app/share/room-3f</div>
+          </div>
+          <div class="mock-content">
+            <div class="mock-label">SHARE - 顧客に共有</div>
+            <div class="mock-share-preview">
+              🏠
+              <div class="mock-share-badge">LIVE 3D</div>
+            </div>
+            <div class="mock-share-options">
+              <div class="mock-share-row">
+                <span class="icon">🔗</span>
+                <span class="text">共有リンクを生成（顧客がブラウザで3D内見）</span>
+              </div>
+              <div class="mock-share-row">
+                <span class="icon">📧</span>
+                <span class="text">メールで送信</span>
+              </div>
+              <div class="mock-share-row">
+                <span class="icon">📱</span>
+                <span class="text">QRコード生成（店頭掲示用）</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TARGET ===== -->
+  <section class="target">
+    <div class="container">
+      <span class="section-label">TARGET</span>
+      <h2 class="section-title">誰のためのサービスか</h2>
+      <p class="section-desc">不動産会社と、その先にいる顧客の両方に価値を届ける</p>
+
+      <div class="target-grid">
+        <div class="target-card">
+          <div class="icon">🏢</div>
+          <h3>不動産会社（メインユーザー）</h3>
+          <ul>
+            <li>物件の魅力を図面以上に伝えたい</li>
+            <li>遠方顧客にも内見体験を提供したい</li>
+            <li>内見の空振りを減らしたい</li>
+            <li>他社との差別化ポイントがほしい</li>
+          </ul>
+        </div>
+        <div class="target-card">
+          <div class="icon">👤</div>
+          <h3>引越し検討者（エンドユーザー）</h3>
+          <ul>
+            <li>図面だけでは部屋のイメージがわかない</li>
+            <li>今の家具が入るか事前に確認したい</li>
+            <li>何件も内見に行く時間がない</li>
+            <li>遠方の物件も検討したい</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== VALUE ===== -->
+  <section class="value">
+    <div class="container">
+      <span class="section-label">VALUE</span>
+      <h2 class="section-title">導入メリット</h2>
+      <p class="section-desc">不動産会社にとっての具体的な価値</p>
+
+      <div class="value-grid">
+        <div class="value-card">
+          <div class="value-num">-60%</div>
+          <h3>無駄な内見の削減</h3>
+          <p>事前に3Dで確認できることで、成約につながらない内見を大幅削減</p>
+        </div>
+        <div class="value-card">
+          <div class="value-num">+40%</div>
+          <h3>問い合わせ率UP</h3>
+          <p>3D内見付きの物件は図面のみの物件より高い反響率が期待できる</p>
+        </div>
+        <div class="value-card">
+          <div class="value-num">2x</div>
+          <h3>商圏の拡大</h3>
+          <p>遠方の顧客にもリアルな内見体験を提供し、商圏を広げる</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <div class="logo">ROOMCRAFT</div>
+    <p>間取り図から、歩ける部屋へ。</p>
+    <p style="margin-top: 1rem; font-size: 0.75rem;">Service Concept Document - 2026</p>
+  </footer>
+
+</body>
+</html>
