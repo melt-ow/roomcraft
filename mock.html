@@ -231,6 +231,58 @@
     .hud-btn:hover { background: rgba(45,91,255,0.4); border-color: var(--primary); }
     .hud-btn.active { background: var(--primary); border-color: var(--primary); }
 
+    /* Placement mode banner */
+    .place-banner {
+      position: fixed;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(45,91,255,0.9);
+      padding: 0.6rem 1.5rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      z-index: 200;
+      display: none;
+      backdrop-filter: blur(10px);
+      text-align: center;
+    }
+
+    .place-banner.show { display: block; }
+    .place-banner .banner-sub { font-size: 0.7rem; font-weight: 400; opacity: 0.7; margin-top: 0.2rem; }
+
+    /* Selected furniture indicator */
+    .select-banner {
+      position: fixed;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255,107,53,0.9);
+      padding: 0.6rem 1.5rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      z-index: 200;
+      display: none;
+      backdrop-filter: blur(10px);
+      text-align: center;
+    }
+
+    .select-banner.show { display: block; }
+    .select-banner .banner-btns { display: flex; gap: 0.5rem; margin-top: 0.4rem; justify-content: center; }
+    .select-banner .banner-btn {
+      padding: 0.3rem 0.7rem;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .select-banner .btn-move { background: rgba(255,255,255,0.2); color: white; }
+    .select-banner .btn-rotate { background: rgba(255,255,255,0.2); color: white; }
+    .select-banner .btn-delete { background: rgba(255,80,80,0.4); color: #ffcccc; }
+
     /* Crosshair */
     .crosshair {
       position: fixed;
@@ -493,7 +545,24 @@
       <div class="key-hint"><span class="key">S</span>後退</div>
       <div class="key-hint"><span class="key">A</span>左</div>
       <div class="key-hint"><span class="key">D</span>右</div>
+      <div class="key-hint"><span class="key">R</span>回転</div>
       <div class="key-hint"><span class="key">ESC</span>メニュー</div>
+    </div>
+
+    <!-- Placement mode banner -->
+    <div class="place-banner" id="place-banner">
+      <div id="place-banner-text">ソファ を配置中...</div>
+      <div class="banner-sub">クリックで設置 / R で回転 / ESC でキャンセル</div>
+    </div>
+
+    <!-- Selected furniture banner -->
+    <div class="select-banner" id="select-banner">
+      <div id="select-banner-text">ソファ を選択中</div>
+      <div class="banner-btns">
+        <button class="banner-btn btn-move" onclick="window.startMoving()">📍 移動</button>
+        <button class="banner-btn btn-rotate" onclick="window.rotateSelected()">🔄 回転</button>
+        <button class="banner-btn btn-delete" onclick="window.deleteSelected()">🗑️ 削除</button>
+      </div>
     </div>
 
     <!-- Bottom controls -->
@@ -556,7 +625,7 @@
       { id:'washer',  icon:'🫧', name:'洗濯機',           size:'W60×D55',   cat:'other',   w:0.6, d:0.55, h:0.9,  color:0xdddddd },
     ];
 
-    const placed = {};
+    const placed = {};       // id -> { mesh, data }
     let currentCat = 'all';
 
     // ===== THREE.JS SETUP =====
@@ -565,6 +634,21 @@
     const velocity = new THREE.Vector3();
     const direction = new THREE.Vector3();
     let isLocked = false;
+
+    // Placement mode
+    let placingFurniture = null;  // furniture data being placed
+    let ghostMesh = null;         // preview mesh
+    let ghostRotation = 0;        // current rotation of ghost
+
+    // Selection mode
+    let selectedMesh = null;      // currently selected placed furniture
+    let selectedId = null;
+    let movingMode = false;       // moving a selected furniture
+
+    // Raycaster
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2(0, 0); // center of screen
+    let floorMeshes = [];  // floor planes for raycasting
 
     // Minimap
     let minimapCtx;
@@ -603,11 +687,18 @@
       });
 
       controls.addEventListener('unlock', () => {
-        if (!document.getElementById('furniture-sidebar').classList.contains('open')) {
+        const sidebarOpen = document.getElementById('furniture-sidebar').classList.contains('open');
+        const selectOpen = document.getElementById('select-banner').classList.contains('show');
+        if (!sidebarOpen && !selectOpen) {
           overlay.classList.remove('hidden');
         }
         document.getElementById('crosshair').style.display = 'none';
         isLocked = false;
+
+        // Cancel placement on unlock (ESC)
+        if (placingFurniture) {
+          cancelPlacing();
+        }
       });
 
       // Lighting
@@ -633,6 +724,9 @@
 
       // Build room
       buildRoom();
+
+      // Click handler for placing/selecting furniture
+      document.addEventListener('click', onCanvasClick);
 
       // Keyboard
       document.addEventListener('keydown', onKeyDown);
@@ -714,7 +808,9 @@
       ldkFloor.rotation.x = -Math.PI / 2;
       ldkFloor.position.set(0, 0, 0);
       ldkFloor.receiveShadow = true;
+      ldkFloor.name = 'floor';
       scene.add(ldkFloor);
+      floorMeshes.push(ldkFloor);
 
       // Ceiling
       const ldkCeiling = new THREE.Mesh(new THREE.PlaneGeometry(8, 5), ceilingMat);
@@ -745,7 +841,9 @@
       brFloor.rotation.x = -Math.PI / 2;
       brFloor.position.set(6, 0, -0.5);
       brFloor.receiveShadow = true;
+      brFloor.name = 'floor';
       scene.add(brFloor);
+      floorMeshes.push(brFloor);
 
       const brCeiling = new THREE.Mesh(new THREE.PlaneGeometry(4, 4), ceilingMat);
       brCeiling.rotation.x = Math.PI / 2;
@@ -887,8 +985,57 @@
       }
     }
 
-    // ===== PLACE FURNITURE 3D =====
-    function placeFurniture3D(f) {
+    // ===== RAYCASTING HELPERS =====
+    function getFloorIntersection() {
+      raycaster.setFromCamera(pointer, camera);
+      const hits = raycaster.intersectObjects(floorMeshes);
+      return hits.length > 0 ? hits[0].point : null;
+    }
+
+    function getFurnitureIntersection() {
+      raycaster.setFromCamera(pointer, camera);
+      const furnMeshes = Object.values(placed).map(p => p.mesh);
+      const hits = raycaster.intersectObjects(furnMeshes);
+      return hits.length > 0 ? hits[0].object : null;
+    }
+
+    // ===== PLACEMENT MODE =====
+    function startPlacing(f) {
+      // Cancel any current placement/selection
+      cancelPlacing();
+      deselectFurniture();
+
+      placingFurniture = f;
+      ghostRotation = 0;
+
+      // Create ghost (semi-transparent preview)
+      const geo = new THREE.BoxGeometry(f.w, f.h, f.d);
+      const mat = new THREE.MeshStandardMaterial({
+        color: f.color,
+        transparent: true,
+        opacity: 0.5,
+        roughness: 0.6,
+      });
+      ghostMesh = new THREE.Mesh(geo, mat);
+      ghostMesh.castShadow = false;
+      ghostMesh.position.set(camera.position.x, f.h / 2, camera.position.z - 2);
+      scene.add(ghostMesh);
+
+      // Show banner
+      document.getElementById('place-banner-text').textContent = `${f.icon} ${f.name} を配置中...`;
+      document.getElementById('place-banner').classList.add('show');
+
+      // Close sidebar and lock controls
+      document.getElementById('furniture-sidebar').classList.remove('open');
+      setTimeout(() => controls.lock(), 100);
+    }
+
+    function confirmPlacing() {
+      if (!placingFurniture || !ghostMesh) return;
+
+      const f = placingFurniture;
+
+      // Create real mesh at ghost position
       const geo = new THREE.BoxGeometry(f.w, f.h, f.d);
       const mat = new THREE.MeshStandardMaterial({
         color: f.color,
@@ -898,33 +1045,157 @@
       const mesh = new THREE.Mesh(geo, mat);
       mesh.castShadow = true;
       mesh.receiveShadow = true;
-
-      // Position based on type
-      const positions = {
-        sofa:   { x: 0,    z: 0.5  },
-        tv:     { x: 0,    z: -2.0 },
-        ctable: { x: 0,    z: -0.5 },
-        dining: { x: -2.5, z: 0.5  },
-        bed:    { x: 6.5,  z: -1.5 },
-        desk:   { x: 5,    z: 0.5  },
-        shelf:  { x: -3.7, z: -0.5 },
-        fridge: { x: -3.5, z: -2.0 },
-        washer: { x: -3.5, z: 1.5  },
-      };
-
-      const pos = positions[f.id] || { x: 0, z: 0 };
-      mesh.position.set(pos.x, f.h / 2, pos.z);
+      mesh.position.copy(ghostMesh.position);
+      mesh.rotation.copy(ghostMesh.rotation);
       mesh.name = 'furniture_' + f.id;
-
       scene.add(mesh);
-      placed[f.id] = mesh;
+
+      placed[f.id] = { mesh, data: f };
+
+      // Clean up ghost
+      scene.remove(ghostMesh);
+      ghostMesh.geometry.dispose();
+      ghostMesh.material.dispose();
+      ghostMesh = null;
+      placingFurniture = null;
+
+      document.getElementById('place-banner').classList.remove('show');
+      showToast(`${f.icon} ${f.name} を配置しました`);
+      renderFurnitureList();
+    }
+
+    function cancelPlacing() {
+      if (ghostMesh) {
+        scene.remove(ghostMesh);
+        ghostMesh.geometry.dispose();
+        ghostMesh.material.dispose();
+        ghostMesh = null;
+      }
+      placingFurniture = null;
+      movingMode = false;
+      document.getElementById('place-banner').classList.remove('show');
+    }
+
+    // ===== SELECTION MODE =====
+    function selectFurniture(mesh) {
+      deselectFurniture();
+
+      selectedMesh = mesh;
+      // Find which furniture this is
+      for (const [id, entry] of Object.entries(placed)) {
+        if (entry.mesh === mesh) {
+          selectedId = id;
+          break;
+        }
+      }
+
+      // Highlight
+      selectedMesh.material.emissive = new THREE.Color(0xFF6B35);
+      selectedMesh.material.emissiveIntensity = 0.3;
+
+      const f = placed[selectedId].data;
+      document.getElementById('select-banner-text').textContent = `${f.icon} ${f.name} を選択中`;
+      document.getElementById('select-banner').classList.add('show');
+    }
+
+    function deselectFurniture() {
+      if (selectedMesh) {
+        selectedMesh.material.emissive = new THREE.Color(0x000000);
+        selectedMesh.material.emissiveIntensity = 0;
+        selectedMesh = null;
+        selectedId = null;
+      }
+      movingMode = false;
+      document.getElementById('select-banner').classList.remove('show');
+    }
+
+    window.startMoving = () => {
+      if (!selectedMesh || !selectedId) return;
+      const entry = placed[selectedId];
+
+      // Switch to placement mode with this furniture
+      movingMode = true;
+      placingFurniture = entry.data;
+      ghostRotation = entry.mesh.rotation.y;
+
+      // Turn current mesh into ghost
+      const geo = new THREE.BoxGeometry(entry.data.w, entry.data.h, entry.data.d);
+      const mat = new THREE.MeshStandardMaterial({
+        color: entry.data.color,
+        transparent: true,
+        opacity: 0.5,
+        roughness: 0.6,
+      });
+      ghostMesh = new THREE.Mesh(geo, mat);
+      ghostMesh.position.copy(entry.mesh.position);
+      ghostMesh.rotation.copy(entry.mesh.rotation);
+      scene.add(ghostMesh);
+
+      // Remove original
+      scene.remove(entry.mesh);
+      entry.mesh.geometry.dispose();
+      entry.mesh.material.dispose();
+      delete placed[selectedId];
+
+      deselectFurniture();
+
+      document.getElementById('place-banner-text').textContent = `${placingFurniture.icon} ${placingFurniture.name} を移動中...`;
+      document.getElementById('place-banner').classList.add('show');
+
+      setTimeout(() => controls.lock(), 100);
+      renderFurnitureList();
+    };
+
+    window.rotateSelected = () => {
+      if (selectedMesh) {
+        selectedMesh.rotation.y += Math.PI / 4;
+        showToast('45° 回転しました');
+      }
+    };
+
+    window.deleteSelected = () => {
+      if (selectedId && placed[selectedId]) {
+        const f = placed[selectedId].data;
+        scene.remove(placed[selectedId].mesh);
+        placed[selectedId].mesh.geometry.dispose();
+        placed[selectedId].mesh.material.dispose();
+        delete placed[selectedId];
+        deselectFurniture();
+        showToast(`${f.icon} ${f.name} を撤去しました`);
+        renderFurnitureList();
+      }
+    };
+
+    // ===== CLICK HANDLER =====
+    function onCanvasClick(e) {
+      if (!isLocked) return;
+
+      // Placing mode: confirm placement
+      if (placingFurniture && ghostMesh) {
+        confirmPlacing();
+        return;
+      }
+
+      // Not placing: try to select furniture
+      const hitMesh = getFurnitureIntersection();
+      if (hitMesh) {
+        selectFurniture(hitMesh);
+        controls.unlock();
+      } else {
+        deselectFurniture();
+      }
+    }
+
+    // ===== PLACE FURNITURE (from sidebar button) =====
+    function placeFurniture3D(f) {
+      startPlacing(f);
     }
 
     function removeFurniture3D(id) {
       if (placed[id]) {
-        scene.remove(placed[id]);
-        placed[id].geometry.dispose();
-        placed[id].material.dispose();
+        scene.remove(placed[id].mesh);
+        placed[id].mesh.geometry.dispose();
+        placed[id].mesh.material.dispose();
         delete placed[id];
       }
     }
@@ -959,6 +1230,16 @@
           <button class="fc-btn" onclick="window.toggleFurniture('${f.id}')">${placed[f.id] ? '撤去' : '配置'}</button>
         </div>
       `).join('');
+
+      // Also update sidebar cats active state
+      document.querySelectorAll('.sidebar-cat').forEach(b => {
+        b.classList.toggle('active', b.textContent === (
+          currentCat === 'all' ? 'すべて' :
+          currentCat === 'living' ? 'リビング' :
+          currentCat === 'bedroom' ? '寝室' :
+          currentCat === 'dining' ? 'ダイニング' : 'その他'
+        ));
+      });
     }
 
     window.filterCat = (cat, btn) => {
@@ -970,12 +1251,12 @@
       const f = furnitureData.find(d => d.id === id);
       if (placed[id]) {
         removeFurniture3D(id);
-        showToast(`${f.name} を撤去しました`);
+        showToast(`${f.icon} ${f.name} を撤去しました`);
+        renderFurnitureList();
       } else {
-        placeFurniture3D(f);
-        showToast(`${f.name} を配置しました`);
+        // Enter placement mode
+        startPlacing(f);
       }
-      renderFurnitureList();
     };
 
     window.toggleFurnitureSidebar = () => {
@@ -1002,6 +1283,24 @@
         case 'KeyS': case 'ArrowDown': moveBackward = true; break;
         case 'KeyA': case 'ArrowLeft': moveLeft = true; break;
         case 'KeyD': case 'ArrowRight': moveRight = true; break;
+        case 'KeyR':
+          // Rotate ghost or selected
+          if (placingFurniture && ghostMesh) {
+            ghostRotation += Math.PI / 4;
+            ghostMesh.rotation.y = ghostRotation;
+            showToast('45° 回転');
+          } else if (selectedMesh) {
+            window.rotateSelected();
+          }
+          break;
+        case 'Escape':
+          if (placingFurniture) {
+            cancelPlacing();
+            showToast('配置をキャンセルしました');
+          } else if (selectedMesh) {
+            deselectFurniture();
+          }
+          break;
       }
     }
 
@@ -1044,6 +1343,16 @@
       ctx.font = '8px sans-serif';
       ctx.fillText('LDK', ox - 15, oy + 3);
       ctx.fillText('BR', ox + 52, oy - 5);
+
+      // Placed furniture on minimap
+      ctx.fillStyle = 'rgba(45,91,255,0.4)';
+      for (const [id, entry] of Object.entries(placed)) {
+        const fx = ox + entry.mesh.position.x * scale;
+        const fz = oy + entry.mesh.position.z * scale;
+        const fw = entry.data.w * scale;
+        const fd = entry.data.d * scale;
+        ctx.fillRect(fx - fw/2, fz - fd/2, fw, fd);
+      }
 
       // Player position
       const px = ox + camera.position.x * scale;
@@ -1094,6 +1403,16 @@
         // Simple boundary clamping
         camera.position.x = Math.max(-3.8, Math.min(7.8, camera.position.x));
         camera.position.z = Math.max(-2.3, Math.min(2.3, camera.position.z));
+      }
+
+      // Update ghost position (follows where player looks on the floor)
+      if (placingFurniture && ghostMesh && controls.isLocked) {
+        const floorPoint = getFloorIntersection();
+        if (floorPoint) {
+          ghostMesh.position.x = floorPoint.x;
+          ghostMesh.position.z = floorPoint.z;
+          ghostMesh.position.y = placingFurniture.h / 2;
+        }
       }
 
       drawMinimap();
