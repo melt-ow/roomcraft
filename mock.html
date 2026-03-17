@@ -3,160 +3,69 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ROOMCRAFT - インタラクティブモック</title>
+  <title>ROOMCRAFT - 3Dバーチャル内見</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap');
-
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
       --primary: #2D5BFF;
       --primary-hover: #1a45e0;
-      --primary-light: #EEF2FF;
       --accent: #FF6B35;
       --dark: #1a1a2e;
-      --darker: #12122a;
       --card: #222244;
       --card-border: rgba(255,255,255,0.08);
       --text: #e0e0f0;
       --text-dim: rgba(255,255,255,0.4);
-      --text-dimmer: rgba(255,255,255,0.2);
       --success: #28C840;
-      --radius: 12px;
     }
 
     body {
       font-family: 'Noto Sans JP', sans-serif;
-      background: var(--darker);
+      background: #000;
       color: var(--text);
-      height: 100vh;
       overflow: hidden;
-    }
-
-    /* ========== LAYOUT ========== */
-    .app {
-      display: grid;
-      grid-template-rows: 56px 1fr;
       height: 100vh;
     }
 
-    /* ========== HEADER ========== */
-    .header {
-      background: var(--dark);
-      border-bottom: 1px solid var(--card-border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 1.5rem;
-      z-index: 100;
-    }
-
-    .header-logo {
-      font-size: 1.1rem;
-      font-weight: 900;
-      letter-spacing: 0.1em;
-      background: linear-gradient(135deg, #fff, #a8c0ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .header-steps {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .header-step {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.4rem 1rem;
-      border-radius: 50px;
-      font-size: 0.8rem;
-      font-weight: 500;
-      background: rgba(255,255,255,0.05);
-      color: var(--text-dim);
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .header-step.active {
-      background: var(--primary);
-      color: white;
-    }
-
-    .header-step.done {
-      background: rgba(40,200,64,0.15);
-      color: var(--success);
-    }
-
-    .header-step-num {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.65rem;
-      font-weight: 900;
-      background: rgba(255,255,255,0.1);
-    }
-
-    .header-step.active .header-step-num { background: rgba(255,255,255,0.25); }
-    .header-step.done .header-step-num { background: rgba(40,200,64,0.3); }
-
-    .header-share-btn {
-      background: var(--accent);
-      color: white;
-      border: none;
-      padding: 0.5rem 1.2rem;
-      border-radius: 8px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      cursor: pointer;
-      display: none;
-      transition: background 0.2s;
-    }
-
-    .header-share-btn:hover { background: #e55a28; }
-    .header-share-btn.visible { display: block; }
-
-    /* ========== SCREENS ========== */
-    .screen {
-      display: none;
-      height: 100%;
-      overflow: hidden;
-    }
-
+    /* ===== UPLOAD SCREEN ===== */
+    .screen { display: none; height: 100vh; }
     .screen.active { display: flex; }
 
-    /* ===== SCREEN 1: UPLOAD ===== */
     .upload-screen {
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
       align-items: center;
       justify-content: center;
     }
 
     .upload-container {
       width: 100%;
-      max-width: 560px;
+      max-width: 520px;
       padding: 2rem;
     }
 
-    .upload-title {
-      font-size: 1.5rem;
+    .upload-logo {
+      font-size: 2rem;
       font-weight: 900;
+      letter-spacing: 0.15em;
+      text-align: center;
       margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #fff, #a8c0ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
-    .upload-subtitle {
+    .upload-tagline {
+      text-align: center;
       color: var(--text-dim);
       font-size: 0.9rem;
-      margin-bottom: 2rem;
+      margin-bottom: 2.5rem;
     }
 
     .upload-dropzone {
       border: 2px dashed rgba(255,255,255,0.15);
       border-radius: 16px;
-      padding: 3rem 2rem;
+      padding: 2.5rem;
       text-align: center;
       cursor: pointer;
       transition: all 0.3s;
@@ -164,51 +73,16 @@
       position: relative;
     }
 
-    .upload-dropzone:hover,
-    .upload-dropzone.dragover {
-      border-color: var(--primary);
-      background: rgba(45,91,255,0.05);
-    }
+    .upload-dropzone:hover { border-color: var(--primary); background: rgba(45,91,255,0.05); }
+    .upload-dropzone.has-file { border-color: var(--success); background: rgba(40,200,64,0.05); }
+    .upload-dropzone .dz-icon { font-size: 2.5rem; margin-bottom: 0.8rem; }
+    .upload-dropzone .dz-text { font-weight: 500; margin-bottom: 0.3rem; }
+    .upload-dropzone .dz-hint { font-size: 0.8rem; color: var(--text-dim); }
+    .upload-dropzone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 
-    .upload-dropzone.has-file {
-      border-color: var(--success);
-      background: rgba(40,200,64,0.05);
-    }
-
-    .upload-dropzone-icon { font-size: 3rem; margin-bottom: 1rem; }
-    .upload-dropzone-text { font-size: 0.95rem; font-weight: 500; margin-bottom: 0.3rem; }
-    .upload-dropzone-hint { font-size: 0.8rem; color: var(--text-dim); }
-
-    .upload-dropzone input[type="file"] {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      cursor: pointer;
-    }
-
-    .upload-preview {
-      display: none;
-      margin-bottom: 1.5rem;
-    }
-
+    .upload-preview { display: none; margin-bottom: 1.5rem; }
     .upload-preview.visible { display: block; }
-
-    .upload-preview img {
-      width: 100%;
-      max-height: 200px;
-      object-fit: contain;
-      border-radius: 12px;
-      background: rgba(255,255,255,0.03);
-    }
-
-    .upload-preview-name {
-      font-size: 0.8rem;
-      color: var(--success);
-      margin-top: 0.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.3rem;
-    }
+    .upload-preview img { width: 100%; max-height: 160px; object-fit: contain; border-radius: 12px; background: rgba(255,255,255,0.03); }
 
     .form-grid {
       display: grid;
@@ -218,12 +92,7 @@
     }
 
     .form-group { display: flex; flex-direction: column; gap: 0.3rem; }
-
-    .form-label {
-      font-size: 0.75rem;
-      color: var(--text-dim);
-      font-weight: 500;
-    }
+    .form-label { font-size: 0.75rem; color: var(--text-dim); }
 
     .form-input, .form-select {
       background: rgba(255,255,255,0.05);
@@ -234,11 +103,9 @@
       font-size: 0.85rem;
       font-family: inherit;
       outline: none;
-      transition: border-color 0.2s;
     }
 
     .form-input:focus, .form-select:focus { border-color: var(--primary); }
-    .form-select { cursor: pointer; }
     .form-select option { background: var(--dark); }
 
     .btn-primary {
@@ -247,20 +114,19 @@
       background: var(--primary);
       color: white;
       border: none;
-      border-radius: var(--radius);
+      border-radius: 12px;
       font-size: 0.95rem;
       font-weight: 700;
       font-family: inherit;
       cursor: pointer;
-      transition: background 0.2s;
       letter-spacing: 0.05em;
     }
 
     .btn-primary:hover { background: var(--primary-hover); }
-    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 
     /* ===== LOADING ===== */
     .loading-screen {
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
       align-items: center;
       justify-content: center;
       flex-direction: column;
@@ -268,8 +134,7 @@
     }
 
     .loading-spinner {
-      width: 60px;
-      height: 60px;
+      width: 60px; height: 60px;
       border: 4px solid rgba(255,255,255,0.1);
       border-top-color: var(--primary);
       border-radius: 50%;
@@ -278,291 +143,197 @@
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    .loading-text {
-      font-size: 1.1rem;
-      font-weight: 500;
-    }
+    .loading-text { font-size: 1.1rem; font-weight: 500; }
+    .loading-sub { font-size: 0.85rem; color: var(--text-dim); }
 
-    .loading-sub {
-      font-size: 0.85rem;
-      color: var(--text-dim);
-    }
+    .loading-progress { width: 300px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
+    .loading-progress-bar { height: 100%; background: var(--primary); border-radius: 4px; width: 0%; transition: width 0.3s; }
 
-    .loading-progress {
-      width: 300px;
-      height: 4px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 4px;
-      overflow: hidden;
-    }
+    /* ===== 3D VIEWER ===== */
+    #viewer-screen { position: relative; }
+    #viewer-screen.active { display: block; }
 
-    .loading-progress-bar {
-      height: 100%;
-      background: var(--primary);
-      border-radius: 4px;
-      width: 0%;
-      transition: width 0.3s;
-    }
+    #three-canvas { width: 100%; height: 100vh; display: block; }
 
-    /* ===== SCREEN 2: 3D VIEW ===== */
-    .viewer-screen {
-      display: none;
+    /* Click to start overlay */
+    .click-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
       flex-direction: column;
+      gap: 1rem;
+      z-index: 200;
+      cursor: pointer;
     }
 
-    .viewer-screen.active { display: flex; }
+    .click-overlay.hidden { display: none; }
 
-    .viewer-toolbar {
+    .click-overlay-icon { font-size: 3rem; }
+    .click-overlay-text { font-size: 1.2rem; font-weight: 700; }
+    .click-overlay-hint { font-size: 0.85rem; color: var(--text-dim); }
+
+    /* HUD */
+    .hud {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      padding: 1rem 1.5rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.8rem 1.5rem;
-      background: var(--dark);
-      border-bottom: 1px solid var(--card-border);
+      z-index: 100;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(0,0,0,0.5) 0%, transparent 100%);
     }
 
-    .viewer-tools {
-      display: flex;
-      gap: 0.4rem;
+    .hud > * { pointer-events: auto; }
+
+    .hud-logo {
+      font-size: 1rem;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      opacity: 0.8;
     }
 
-    .viewer-tool {
-      padding: 0.5rem 0.9rem;
-      border-radius: 8px;
-      font-size: 0.8rem;
-      background: rgba(255,255,255,0.05);
-      color: var(--text-dim);
-      border: none;
-      cursor: pointer;
-      font-family: inherit;
-      display: flex;
-      align-items: center;
-      gap: 0.3rem;
-      transition: all 0.2s;
-    }
-
-    .viewer-tool:hover { background: rgba(255,255,255,0.1); color: var(--text); }
-    .viewer-tool.active { background: var(--primary); color: white; }
-
-    .viewer-info {
+    .hud-info {
       font-size: 0.8rem;
       color: var(--text-dim);
+      background: rgba(0,0,0,0.4);
+      padding: 0.4rem 1rem;
+      border-radius: 50px;
     }
 
-    .viewer-main {
-      flex: 1;
-      display: flex;
-      overflow: hidden;
-    }
-
-    /* 3D Canvas Area */
-    .room-canvas {
-      flex: 1;
-      position: relative;
-      background: linear-gradient(180deg, #1a1a3a 0%, #252550 100%);
-      overflow: hidden;
-      cursor: grab;
-    }
-
-    .room-canvas:active { cursor: grabbing; }
-
-    .room-3d {
-      position: absolute;
-      width: 700px;
-      height: 500px;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) perspective(800px) rotateX(25deg) rotateZ(-15deg);
-      transition: transform 0.5s;
-    }
-
-    .room-3d.top-view {
-      transform: translate(-50%, -50%) perspective(800px) rotateX(90deg) rotateZ(0deg);
-    }
-
-    .room-floor {
-      position: absolute;
-      inset: 40px;
-      background: #3a3a5a;
-      border: 2px solid rgba(255,255,255,0.1);
-      border-radius: 4px;
-    }
-
-    .room-grid {
-      position: absolute;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
-      background-size: 40px 40px;
-    }
-
-    /* Walls */
-    .room-wall {
-      position: absolute;
-      background: linear-gradient(180deg, rgba(60,60,100,0.8), rgba(40,40,70,0.6));
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-
-    .wall-back {
-      top: 0; left: 40px; right: 40px; height: 40px;
-      transform-origin: bottom;
-      transform: rotateX(-70deg);
-      background: linear-gradient(180deg, rgba(80,80,130,0.6), rgba(60,60,100,0.8));
-    }
-
-    .wall-left {
-      top: 0; left: 0; bottom: 40px; width: 40px;
-      transform-origin: right;
-      transform: rotateY(70deg);
-      background: linear-gradient(90deg, rgba(50,50,80,0.6), rgba(60,60,100,0.8));
-    }
-
-    /* Window on back wall */
-    .room-window {
-      position: absolute;
-      top: 8px; left: 50%; transform: translateX(-50%);
-      width: 120px; height: 24px;
-      background: linear-gradient(180deg, #87CEEB44, #4a90d944);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 2px;
-    }
-
-    /* Furniture items in 3D */
-    .furniture-3d {
-      position: absolute;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      cursor: move;
-      transition: box-shadow 0.2s;
-      user-select: none;
-      z-index: 10;
-    }
-
-    .furniture-3d:hover {
-      box-shadow: 0 0 0 2px var(--primary), 0 4px 15px rgba(45,91,255,0.3);
-    }
-
-    .furniture-3d.dragging {
-      box-shadow: 0 0 0 2px var(--accent), 0 8px 25px rgba(255,107,53,0.4);
-      z-index: 20;
-    }
-
-    .furniture-3d .furn-label {
-      position: absolute;
-      bottom: -20px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 0.6rem;
-      color: var(--text-dim);
-      white-space: nowrap;
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-
-    .furniture-3d:hover .furn-label { opacity: 1; }
-
-    /* Dimension labels */
-    .dimension-label {
-      position: absolute;
-      font-size: 0.65rem;
-      color: rgba(255,255,255,0.3);
-      letter-spacing: 0.05em;
-    }
-
-    .dim-width {
-      bottom: 25px;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-
-    .dim-height {
-      left: 25px;
-      top: 50%;
-      transform: translateY(-50%) rotate(-90deg);
-    }
-
-    /* Compass */
-    .room-compass {
-      position: absolute;
+    .hud-controls {
+      position: fixed;
       bottom: 20px;
-      right: 20px;
-      width: 50px;
-      height: 50px;
-      background: rgba(0,0,0,0.3);
-      border-radius: 50%;
-      border: 1px solid rgba(255,255,255,0.1);
+      left: 50%;
+      transform: translateX(-50%);
       display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.7rem;
-      color: var(--text-dim);
-      font-weight: 700;
+      gap: 0.5rem;
+      z-index: 100;
     }
 
-    .compass-n { color: #ff6b6b; }
+    .hud-btn {
+      padding: 0.5rem 1rem;
+      background: rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.8rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
+      backdrop-filter: blur(10px);
+    }
 
-    /* ===== SIDEBAR: FURNITURE PANEL ===== */
-    .furniture-panel {
-      width: 280px;
-      background: var(--dark);
+    .hud-btn:hover { background: rgba(45,91,255,0.4); border-color: var(--primary); }
+    .hud-btn.active { background: var(--primary); border-color: var(--primary); }
+
+    /* Crosshair */
+    .crosshair {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 20px; height: 20px;
+      z-index: 150;
+      pointer-events: none;
+    }
+
+    .crosshair::before, .crosshair::after {
+      content: '';
+      position: absolute;
+      background: rgba(255,255,255,0.4);
+    }
+
+    .crosshair::before { top: 50%; left: 0; right: 0; height: 1px; transform: translateY(-50%); }
+    .crosshair::after { left: 50%; top: 0; bottom: 0; width: 1px; transform: translateX(-50%); }
+
+    /* Key hints */
+    .key-hints {
+      position: fixed;
+      bottom: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 1.5rem;
+      z-index: 100;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    .key-hint { display: flex; align-items: center; gap: 0.3rem; }
+
+    .key {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 24px;
+      height: 24px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0 4px;
+    }
+
+    /* Furniture sidebar */
+    .furniture-sidebar {
+      position: fixed;
+      top: 0; right: 0; bottom: 0;
+      width: 300px;
+      background: rgba(20,20,40,0.95);
       border-left: 1px solid var(--card-border);
+      z-index: 180;
+      transform: translateX(100%);
+      transition: transform 0.3s;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
-      transition: width 0.3s;
+      backdrop-filter: blur(20px);
     }
 
-    .furniture-panel.collapsed { width: 0; border: none; }
+    .furniture-sidebar.open { transform: translateX(0); }
 
-    .panel-header {
+    .sidebar-header {
       padding: 1rem 1.2rem;
       border-bottom: 1px solid var(--card-border);
-      font-weight: 700;
-      font-size: 0.9rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      font-weight: 700;
     }
 
-    .panel-toggle {
+    .sidebar-close {
       background: none;
       border: none;
       color: var(--text-dim);
+      font-size: 1.2rem;
       cursor: pointer;
-      font-size: 1rem;
     }
 
-    .panel-categories {
+    .sidebar-cats {
       display: flex;
       gap: 0.3rem;
       padding: 0.8rem 1rem;
       border-bottom: 1px solid var(--card-border);
-      overflow-x: auto;
     }
 
-    .panel-cat {
-      padding: 0.3rem 0.8rem;
+    .sidebar-cat {
+      padding: 0.3rem 0.7rem;
       border-radius: 50px;
       font-size: 0.7rem;
       background: rgba(255,255,255,0.05);
       color: var(--text-dim);
       border: none;
       cursor: pointer;
-      white-space: nowrap;
       font-family: inherit;
-      transition: all 0.2s;
     }
 
-    .panel-cat.active {
-      background: var(--primary);
-      color: white;
-    }
+    .sidebar-cat.active { background: var(--primary); color: white; }
 
-    .furniture-list {
+    .sidebar-list {
       flex: 1;
       overflow-y: auto;
       padding: 0.8rem;
@@ -572,243 +343,119 @@
       align-content: start;
     }
 
-    .furniture-card {
+    .furn-card {
       background: var(--card);
       border: 1px solid var(--card-border);
-      border-radius: var(--radius);
-      padding: 1rem 0.6rem;
+      border-radius: 10px;
+      padding: 0.8rem;
       text-align: center;
       cursor: pointer;
       transition: all 0.2s;
     }
 
-    .furniture-card:hover {
-      border-color: var(--primary);
-      background: rgba(45,91,255,0.1);
-    }
+    .furn-card:hover { border-color: var(--primary); }
+    .furn-card.placed { border-color: var(--success); background: rgba(40,200,64,0.08); }
+    .furn-card .fc-icon { font-size: 1.8rem; margin-bottom: 0.3rem; }
+    .furn-card .fc-name { font-size: 0.75rem; margin-bottom: 0.2rem; }
+    .furn-card .fc-size { font-size: 0.6rem; color: var(--text-dim); margin-bottom: 0.4rem; }
 
-    .furniture-card.placed {
-      border-color: var(--success);
-      background: rgba(40,200,64,0.08);
-    }
-
-    .furniture-card .fc-icon { font-size: 2rem; margin-bottom: 0.4rem; }
-    .furniture-card .fc-name { font-size: 0.75rem; font-weight: 500; margin-bottom: 0.2rem; }
-    .furniture-card .fc-size { font-size: 0.65rem; color: var(--text-dim); }
-
-    .furniture-card .fc-btn {
-      margin-top: 0.5rem;
-      padding: 0.3rem 0.6rem;
+    .furn-card .fc-btn {
+      padding: 0.3rem 0.5rem;
       border-radius: 6px;
       font-size: 0.65rem;
       font-weight: 700;
       border: none;
       cursor: pointer;
       font-family: inherit;
-      transition: all 0.2s;
       background: var(--primary);
       color: white;
     }
 
-    .furniture-card.placed .fc-btn {
-      background: rgba(255,100,100,0.2);
-      color: #ff6b6b;
-    }
-
-    /* ===== SCREEN 4: SHARE ===== */
-    .share-screen {
-      align-items: center;
-      justify-content: center;
-    }
-
-    .share-container {
-      width: 100%;
-      max-width: 480px;
-      padding: 2rem;
-      text-align: center;
-    }
-
-    .share-title {
-      font-size: 1.5rem;
-      font-weight: 900;
-      margin-bottom: 0.5rem;
-    }
-
-    .share-subtitle {
-      color: var(--text-dim);
-      font-size: 0.9rem;
-      margin-bottom: 2rem;
-    }
-
-    .share-preview {
-      background: linear-gradient(135deg, #1a1a3e, #2a2a5e);
-      border-radius: 16px;
-      height: 180px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 3rem;
-      margin-bottom: 2rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .share-preview-badge {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: var(--accent);
-      color: white;
-      font-size: 0.65rem;
-      padding: 0.25rem 0.7rem;
-      border-radius: 50px;
-      font-weight: 700;
-    }
-
-    .share-options {
-      display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
-      text-align: left;
-    }
-
-    .share-option {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      background: var(--card);
-      border: 1px solid var(--card-border);
-      padding: 1rem 1.2rem;
-      border-radius: var(--radius);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .share-option:hover {
-      border-color: var(--primary);
-      background: rgba(45,91,255,0.08);
-    }
-
-    .share-option .so-icon { font-size: 1.5rem; }
-    .share-option .so-text { flex: 1; }
-    .share-option .so-title { font-size: 0.85rem; font-weight: 600; }
-    .share-option .so-desc { font-size: 0.75rem; color: var(--text-dim); }
-
-    .share-option .so-action {
-      font-size: 0.75rem;
-      color: var(--primary);
-      font-weight: 700;
-    }
+    .furn-card.placed .fc-btn { background: rgba(255,100,100,0.2); color: #ff6b6b; }
 
     /* Toast */
     .toast {
       position: fixed;
-      bottom: 30px;
+      bottom: 100px;
       left: 50%;
-      transform: translateX(-50%) translateY(100px);
-      background: var(--success);
+      transform: translateX(-50%) translateY(60px);
+      background: rgba(0,0,0,0.8);
+      border: 1px solid rgba(255,255,255,0.1);
       color: white;
-      padding: 0.8rem 1.5rem;
+      padding: 0.7rem 1.5rem;
       border-radius: 10px;
       font-size: 0.85rem;
-      font-weight: 600;
       z-index: 1000;
-      transition: transform 0.3s;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+      transition: transform 0.3s, opacity 0.3s;
+      opacity: 0;
+      backdrop-filter: blur(10px);
     }
 
-    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
-    /* Reset/Back button */
-    .btn-back {
-      background: rgba(255,255,255,0.08);
-      color: var(--text-dim);
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      font-size: 0.8rem;
-      cursor: pointer;
-      font-family: inherit;
-      margin-top: 1.5rem;
-      transition: all 0.2s;
+    /* Minimap */
+    .minimap {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      width: 150px;
+      height: 120px;
+      background: rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 10px;
+      z-index: 100;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
     }
 
-    .btn-back:hover { background: rgba(255,255,255,0.12); color: var(--text); }
+    .minimap canvas { width: 100%; height: 100%; }
   </style>
 </head>
 <body>
 
-<div class="app">
-  <!-- HEADER -->
-  <header class="header">
-    <div class="header-logo">ROOMCRAFT</div>
-    <div class="header-steps">
-      <div class="header-step active" data-step="1">
-        <span class="header-step-num">1</span> アップロード
-      </div>
-      <div class="header-step" data-step="2">
-        <span class="header-step-num">2</span> 3Dビュー
-      </div>
-      <div class="header-step" data-step="3">
-        <span class="header-step-num">3</span> 家具配置
-      </div>
-      <div class="header-step" data-step="4">
-        <span class="header-step-num">4</span> 共有
-      </div>
-    </div>
-    <button class="header-share-btn" onclick="goToStep(4)">共有する</button>
-  </header>
-
   <!-- SCREEN 1: UPLOAD -->
-  <div class="screen upload-screen active" id="screen-1">
+  <div class="screen upload-screen active" id="screen-upload">
     <div class="upload-container">
-      <h1 class="upload-title">間取り図をアップロード</h1>
-      <p class="upload-subtitle">図面と部屋の情報から3D空間を生成します</p>
+      <div class="upload-logo">ROOMCRAFT</div>
+      <p class="upload-tagline">間取り図から、歩ける部屋へ。</p>
 
       <div class="upload-dropzone" id="dropzone">
-        <div class="upload-dropzone-icon" id="dropzone-icon">📁</div>
-        <p class="upload-dropzone-text" id="dropzone-text">間取り図をドラッグ&ドロップ</p>
-        <p class="upload-dropzone-hint" id="dropzone-hint">PDF, PNG, JPG 対応</p>
+        <div class="dz-icon" id="dz-icon">📁</div>
+        <p class="dz-text" id="dz-text">間取り図をドラッグ&ドロップ</p>
+        <p class="dz-hint" id="dz-hint">PDF, PNG, JPG 対応</p>
         <input type="file" accept="image/*,.pdf" id="file-input">
       </div>
 
       <div class="upload-preview" id="upload-preview">
-        <img id="preview-img" src="" alt="preview">
-        <div class="upload-preview-name">
-          <span>&#10003;</span> <span id="file-name"></span>
-        </div>
+        <img id="preview-img" src="" alt="">
       </div>
 
       <div class="form-grid">
         <div class="form-group">
           <label class="form-label">間取り</label>
           <select class="form-select" id="input-layout">
-            <option value="">選択してください</option>
             <option value="1R">1R</option>
             <option value="1K">1K</option>
             <option value="1LDK">1LDK</option>
             <option value="2LDK" selected>2LDK</option>
             <option value="3LDK">3LDK</option>
-            <option value="4LDK">4LDK</option>
           </select>
         </div>
         <div class="form-group">
           <label class="form-label">面積（m²）</label>
-          <input type="number" class="form-input" placeholder="65" value="65" id="input-area">
+          <input type="number" class="form-input" value="65" id="input-area">
         </div>
         <div class="form-group">
           <label class="form-label">天井高（m）</label>
-          <input type="number" class="form-input" placeholder="2.5" value="2.5" step="0.1" id="input-height">
+          <input type="number" class="form-input" value="2.5" step="0.1" id="input-height">
         </div>
         <div class="form-group">
           <label class="form-label">階数</label>
-          <input type="number" class="form-input" placeholder="3" value="3" id="input-floor">
+          <input type="number" class="form-input" value="3" id="input-floor">
         </div>
       </div>
 
-      <button class="btn-primary" id="btn-generate" onclick="startGenerate()">
-        3D空間を生成する
-      </button>
+      <button class="btn-primary" onclick="startGenerate()">3D空間を生成する</button>
     </div>
   </div>
 
@@ -817,463 +464,719 @@
     <div class="loading-spinner"></div>
     <div class="loading-text" id="loading-text">図面を解析中...</div>
     <div class="loading-sub" id="loading-sub">AIが間取り図を読み取っています</div>
-    <div class="loading-progress">
-      <div class="loading-progress-bar" id="loading-bar"></div>
+    <div class="loading-progress"><div class="loading-progress-bar" id="loading-bar"></div></div>
+  </div>
+
+  <!-- 3D VIEWER -->
+  <div class="screen" id="viewer-screen">
+    <canvas id="three-canvas"></canvas>
+
+    <!-- Click to start -->
+    <div class="click-overlay" id="click-overlay">
+      <div class="click-overlay-icon">🏠</div>
+      <div class="click-overlay-text">クリックして内見を開始</div>
+      <div class="click-overlay-hint">マウスで視点操作 / WASD で移動</div>
+    </div>
+
+    <!-- Crosshair -->
+    <div class="crosshair" id="crosshair" style="display:none;"></div>
+
+    <!-- HUD -->
+    <div class="hud" id="hud">
+      <div class="hud-logo">ROOMCRAFT</div>
+      <div class="hud-info" id="hud-info">2LDK / 65m²</div>
+    </div>
+
+    <!-- Key hints -->
+    <div class="key-hints" id="key-hints">
+      <div class="key-hint"><span class="key">W</span>前進</div>
+      <div class="key-hint"><span class="key">S</span>後退</div>
+      <div class="key-hint"><span class="key">A</span>左</div>
+      <div class="key-hint"><span class="key">D</span>右</div>
+      <div class="key-hint"><span class="key">ESC</span>メニュー</div>
+    </div>
+
+    <!-- Bottom controls -->
+    <div class="hud-controls">
+      <button class="hud-btn" onclick="toggleFurnitureSidebar()">🛋️ 家具を配置</button>
+      <button class="hud-btn" onclick="resetPosition()">📍 入口に戻る</button>
+      <button class="hud-btn" onclick="toggleMinimap()">🗺️ マップ</button>
+    </div>
+
+    <!-- Minimap -->
+    <div class="minimap" id="minimap">
+      <canvas id="minimap-canvas"></canvas>
+    </div>
+
+    <!-- Furniture sidebar -->
+    <div class="furniture-sidebar" id="furniture-sidebar">
+      <div class="sidebar-header">
+        家具プリセット
+        <button class="sidebar-close" onclick="toggleFurnitureSidebar()">&#10005;</button>
+      </div>
+      <div class="sidebar-cats" id="sidebar-cats"></div>
+      <div class="sidebar-list" id="sidebar-list"></div>
     </div>
   </div>
 
-  <!-- SCREEN 2 & 3: 3D VIEWER + FURNITURE -->
-  <div class="screen viewer-screen" id="screen-viewer">
-    <div class="viewer-toolbar">
-      <div class="viewer-tools">
-        <button class="viewer-tool active" onclick="setView('perspective', this)">🏠 パース</button>
-        <button class="viewer-tool" onclick="setView('top', this)">🗺️ 俯瞰</button>
-        <button class="viewer-tool" onclick="togglePanel()">🛋️ 家具パネル</button>
-        <button class="viewer-tool" onclick="toggleMeasure(this)">📐 計測</button>
-      </div>
-      <div class="viewer-info" id="viewer-info">2LDK / 65m² / 天井高2.5m</div>
-    </div>
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
 
-    <div class="viewer-main">
-      <div class="room-canvas" id="room-canvas">
-        <div class="room-3d" id="room-3d">
-          <!-- Walls -->
-          <div class="room-wall wall-back">
-            <div class="room-window"></div>
-          </div>
-          <div class="room-wall wall-left"></div>
-
-          <!-- Floor -->
-          <div class="room-floor" id="room-floor">
-            <div class="room-grid"></div>
-          </div>
-
-          <!-- Dimension labels -->
-          <div class="dimension-label dim-width">8.1m</div>
-          <div class="dimension-label dim-height">6.5m</div>
-        </div>
-
-        <div class="room-compass">
-          <span class="compass-n">N</span>
-        </div>
-      </div>
-
-      <!-- Furniture Panel -->
-      <div class="furniture-panel" id="furniture-panel">
-        <div class="panel-header">
-          家具プリセット
-          <button class="panel-toggle" onclick="togglePanel()">&#10005;</button>
-        </div>
-        <div class="panel-categories">
-          <button class="panel-cat active" onclick="filterCat('all', this)">すべて</button>
-          <button class="panel-cat" onclick="filterCat('living', this)">リビング</button>
-          <button class="panel-cat" onclick="filterCat('bedroom', this)">寝室</button>
-          <button class="panel-cat" onclick="filterCat('dining', this)">ダイニング</button>
-          <button class="panel-cat" onclick="filterCat('other', this)">その他</button>
-        </div>
-        <div class="furniture-list" id="furniture-list"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- SCREEN 4: SHARE -->
-  <div class="screen share-screen" id="screen-4">
-    <div class="share-container">
-      <h1 class="share-title">内見リンクを共有</h1>
-      <p class="share-subtitle">顧客にこの3D内見を体験してもらいましょう</p>
-
-      <div class="share-preview">
-        🏠
-        <div class="share-preview-badge">LIVE 3D</div>
-      </div>
-
-      <div class="share-options">
-        <div class="share-option" onclick="copyLink()">
-          <span class="so-icon">🔗</span>
-          <div class="so-text">
-            <div class="so-title">共有リンクをコピー</div>
-            <div class="so-desc">顧客がブラウザで3D内見できるリンク</div>
-          </div>
-          <span class="so-action">コピー</span>
-        </div>
-        <div class="share-option" onclick="showToast('メール送信画面を開きます（モック）')">
-          <span class="so-icon">📧</span>
-          <div class="so-text">
-            <div class="so-title">メールで送信</div>
-            <div class="so-desc">顧客のメールアドレスに直接送信</div>
-          </div>
-          <span class="so-action">送信</span>
-        </div>
-        <div class="share-option" onclick="showToast('QRコードを生成しました（モック）')">
-          <span class="so-icon">📱</span>
-          <div class="so-text">
-            <div class="so-title">QRコード生成</div>
-            <div class="so-desc">店頭掲示やチラシ用のQRコード</div>
-          </div>
-          <span class="so-action">生成</span>
-        </div>
-      </div>
-
-      <button class="btn-back" onclick="goToStep(2)">← 3Dビューに戻る</button>
-    </div>
-  </div>
-</div>
-
-<!-- Toast -->
-<div class="toast" id="toast"></div>
-
-<script>
-  // ===== FURNITURE DATA =====
-  const furnitureData = [
-    { id: 'sofa', icon: '🛋️', name: '3人掛けソファ', size: 'W180×D85', cat: 'living', w: 120, h: 55, x: 200, y: 280 },
-    { id: 'tv', icon: '📺', name: 'TVボード', size: 'W150×D40', cat: 'living', w: 100, h: 28, x: 200, y: 80 },
-    { id: 'table-l', icon: '🪵', name: 'ローテーブル', size: 'W100×D50', cat: 'living', w: 70, h: 35, x: 220, y: 200 },
-    { id: 'bed', icon: '🛏️', name: 'ダブルベッド', size: 'W140×D200', cat: 'bedroom', w: 95, h: 130, x: 420, y: 100 },
-    { id: 'desk', icon: '🖥️', name: 'デスク', size: 'W120×D60', cat: 'bedroom', w: 80, h: 40, x: 430, y: 300 },
-    { id: 'dining', icon: '🪑', name: 'ダイニングセット', size: 'W120×D80', cat: 'dining', w: 80, h: 55, x: 80, y: 120 },
-    { id: 'shelf', icon: '📚', name: '本棚', size: 'W80×D30', cat: 'other', w: 55, h: 22, x: 80, y: 300 },
-    { id: 'closet', icon: '🗄️', name: 'クローゼット', size: 'W120×D60', cat: 'other', w: 80, h: 40, x: 420, y: 260 },
-  ];
-
-  const placed = {};
-  let currentCat = 'all';
-
-  // ===== RENDER FURNITURE LIST =====
-  function renderFurnitureList() {
-    const list = document.getElementById('furniture-list');
-    const filtered = currentCat === 'all' ? furnitureData : furnitureData.filter(f => f.cat === currentCat);
-
-    list.innerHTML = filtered.map(f => `
-      <div class="furniture-card ${placed[f.id] ? 'placed' : ''}" id="fc-${f.id}">
-        <div class="fc-icon">${f.icon}</div>
-        <div class="fc-name">${f.name}</div>
-        <div class="fc-size">${f.size}</div>
-        <button class="fc-btn" onclick="toggleFurniture('${f.id}')">
-          ${placed[f.id] ? '撤去する' : '配置する'}
-        </button>
-      </div>
-    `).join('');
-  }
-
-  function filterCat(cat, btn) {
-    currentCat = cat;
-    document.querySelectorAll('.panel-cat').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    renderFurnitureList();
-  }
-
-  // ===== TOGGLE FURNITURE =====
-  function toggleFurniture(id) {
-    if (placed[id]) {
-      // Remove
-      const el = document.getElementById('furn-' + id);
-      if (el) el.remove();
-      delete placed[id];
-      showToast('家具を撤去しました');
-    } else {
-      // Place
-      const f = furnitureData.find(d => d.id === id);
-      placeFurniture(f);
-      showToast(`${f.name} を配置しました`);
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+      }
     }
-    renderFurnitureList();
-    updateSteps();
-  }
+  </script>
 
-  function placeFurniture(f) {
-    const floor = document.getElementById('room-floor');
-    const el = document.createElement('div');
-    el.className = 'furniture-3d';
-    el.id = 'furn-' + f.id;
-    el.style.width = f.w + 'px';
-    el.style.height = f.h + 'px';
-    el.style.left = f.x + 'px';
-    el.style.top = f.y + 'px';
-    el.style.background = 'rgba(45,91,255,0.25)';
-    el.style.border = '1px solid rgba(45,91,255,0.5)';
-    el.innerHTML = `${f.icon}<span class="furn-label">${f.name}</span>`;
-    el.setAttribute('data-id', f.id);
+  <script type="module">
+    import * as THREE from 'three';
+    import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 
-    // Drag
-    el.addEventListener('mousedown', startDrag);
-    el.addEventListener('touchstart', startDragTouch, { passive: false });
+    // ===== CONFIG =====
+    const ROOM = {
+      // 2LDK layout: LDK + Bedroom1 + Bedroom2
+      walls: [],
+      eyeHeight: 1.6,
+      ceilingHeight: 2.5,
+    };
 
-    floor.appendChild(el);
-    placed[f.id] = true;
-  }
-
-  // ===== DRAG FURNITURE =====
-  let dragEl = null, dragOffX = 0, dragOffY = 0;
-
-  function startDrag(e) {
-    e.preventDefault();
-    dragEl = e.currentTarget;
-    dragEl.classList.add('dragging');
-    const rect = dragEl.getBoundingClientRect();
-    dragOffX = e.clientX - rect.left;
-    dragOffY = e.clientY - rect.top;
-    document.addEventListener('mousemove', onDrag);
-    document.addEventListener('mouseup', endDrag);
-  }
-
-  function startDragTouch(e) {
-    e.preventDefault();
-    dragEl = e.currentTarget;
-    dragEl.classList.add('dragging');
-    const rect = dragEl.getBoundingClientRect();
-    const touch = e.touches[0];
-    dragOffX = touch.clientX - rect.left;
-    dragOffY = touch.clientY - rect.top;
-    document.addEventListener('touchmove', onDragTouch, { passive: false });
-    document.addEventListener('touchend', endDragTouch);
-  }
-
-  function onDrag(e) {
-    if (!dragEl) return;
-    const parent = dragEl.parentElement.getBoundingClientRect();
-    let x = e.clientX - parent.left - dragOffX;
-    let y = e.clientY - parent.top - dragOffY;
-    x = Math.max(0, Math.min(x, parent.width - dragEl.offsetWidth));
-    y = Math.max(0, Math.min(y, parent.height - dragEl.offsetHeight));
-    dragEl.style.left = x + 'px';
-    dragEl.style.top = y + 'px';
-  }
-
-  function onDragTouch(e) {
-    if (!dragEl) return;
-    e.preventDefault();
-    const parent = dragEl.parentElement.getBoundingClientRect();
-    const touch = e.touches[0];
-    let x = touch.clientX - parent.left - dragOffX;
-    let y = touch.clientY - parent.top - dragOffY;
-    x = Math.max(0, Math.min(x, parent.width - dragEl.offsetWidth));
-    y = Math.max(0, Math.min(y, parent.height - dragEl.offsetHeight));
-    dragEl.style.left = x + 'px';
-    dragEl.style.top = y + 'px';
-  }
-
-  function endDrag() {
-    if (dragEl) dragEl.classList.remove('dragging');
-    dragEl = null;
-    document.removeEventListener('mousemove', onDrag);
-    document.removeEventListener('mouseup', endDrag);
-  }
-
-  function endDragTouch() {
-    if (dragEl) dragEl.classList.remove('dragging');
-    dragEl = null;
-    document.removeEventListener('touchmove', onDragTouch);
-    document.removeEventListener('touchend', endDragTouch);
-  }
-
-  // ===== VIEW CONTROLS =====
-  function setView(view, btn) {
-    document.querySelectorAll('.viewer-tool').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    const room = document.getElementById('room-3d');
-    if (view === 'top') {
-      room.classList.add('top-view');
-    } else {
-      room.classList.remove('top-view');
-    }
-  }
-
-  function togglePanel() {
-    document.getElementById('furniture-panel').classList.toggle('collapsed');
-  }
-
-  function toggleMeasure(btn) {
-    btn.classList.toggle('active');
-    document.querySelectorAll('.dimension-label').forEach(el => {
-      el.style.opacity = btn.classList.contains('active') ? '1' : '0.3';
-    });
-    showToast(btn.classList.contains('active') ? '計測モード ON' : '計測モード OFF');
-  }
-
-  // ===== FILE UPLOAD =====
-  const dropzone = document.getElementById('dropzone');
-  const fileInput = document.getElementById('file-input');
-
-  dropzone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropzone.classList.add('dragover');
-  });
-
-  dropzone.addEventListener('dragleave', () => {
-    dropzone.classList.remove('dragover');
-  });
-
-  dropzone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropzone.classList.remove('dragover');
-    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
-  });
-
-  fileInput.addEventListener('change', (e) => {
-    if (e.target.files.length) handleFile(e.target.files[0]);
-  });
-
-  function handleFile(file) {
-    document.getElementById('file-name').textContent = file.name;
-    dropzone.classList.add('has-file');
-    document.getElementById('dropzone-icon').textContent = '✅';
-    document.getElementById('dropzone-text').textContent = 'ファイルを選択済み';
-    document.getElementById('dropzone-hint').textContent = file.name;
-
-    if (file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        document.getElementById('preview-img').src = e.target.result;
-        document.getElementById('upload-preview').classList.add('visible');
-      };
-      reader.readAsDataURL(file);
-    }
-  }
-
-  // ===== GENERATE =====
-  function startGenerate() {
-    goToScreen('screen-loading');
-    updateStep(1, 'done');
-
-    const messages = [
-      { text: '図面を解析中...', sub: 'AIが間取り図を読み取っています', pct: 15 },
-      { text: '壁・窓を検出中...', sub: '部屋の構造を認識しています', pct: 35 },
-      { text: '3Dモデルを構築中...', sub: '空間を3次元に変換しています', pct: 60 },
-      { text: 'テクスチャを適用中...', sub: '床材・壁紙を設定しています', pct: 80 },
-      { text: '最終調整中...', sub: 'まもなく完了します', pct: 95 },
+    // ===== FURNITURE DATA =====
+    const furnitureData = [
+      { id:'sofa',    icon:'🛋️', name:'3人掛けソファ',    size:'W180×D85',  cat:'living',  w:1.8, d:0.85, h:0.75, color:0x4466aa },
+      { id:'tv',      icon:'📺', name:'TVボード',         size:'W150×D40',  cat:'living',  w:1.5, d:0.4,  h:0.5,  color:0x3a3a3a },
+      { id:'ctable',  icon:'🪵', name:'ローテーブル',     size:'W100×D50',  cat:'living',  w:1.0, d:0.5,  h:0.35, color:0x8B6914 },
+      { id:'bed',     icon:'🛏️', name:'ダブルベッド',     size:'W140×D200', cat:'bedroom', w:1.4, d:2.0,  h:0.45, color:0xccccdd },
+      { id:'desk',    icon:'🖥️', name:'デスク',           size:'W120×D60',  cat:'bedroom', w:1.2, d:0.6,  h:0.72, color:0x8B6914 },
+      { id:'dining',  icon:'🪑', name:'ダイニングセット', size:'W120×D80',  cat:'dining',  w:1.2, d:0.8,  h:0.75, color:0x8B5E3C },
+      { id:'shelf',   icon:'📚', name:'本棚',             size:'W80×D30',   cat:'other',   w:0.8, d:0.3,  h:1.8,  color:0x6B4226 },
+      { id:'fridge',  icon:'🧊', name:'冷蔵庫',           size:'W60×D65',   cat:'other',   w:0.6, d:0.65, h:1.7,  color:0xdddde0 },
+      { id:'washer',  icon:'🫧', name:'洗濯機',           size:'W60×D55',   cat:'other',   w:0.6, d:0.55, h:0.9,  color:0xdddddd },
     ];
 
-    let i = 0;
-    const interval = setInterval(() => {
-      if (i < messages.length) {
-        document.getElementById('loading-text').textContent = messages[i].text;
-        document.getElementById('loading-sub').textContent = messages[i].sub;
-        document.getElementById('loading-bar').style.width = messages[i].pct + '%';
-        i++;
+    const placed = {};
+    let currentCat = 'all';
+
+    // ===== THREE.JS SETUP =====
+    let scene, camera, renderer, controls;
+    let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
+    const velocity = new THREE.Vector3();
+    const direction = new THREE.Vector3();
+    let isLocked = false;
+
+    // Minimap
+    let minimapCtx;
+
+    function init() {
+      const canvas = document.getElementById('three-canvas');
+
+      // Scene
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x87CEEB);
+      scene.fog = new THREE.Fog(0x87CEEB, 15, 30);
+
+      // Camera
+      camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
+      camera.position.set(0, ROOM.eyeHeight, 4);
+
+      // Renderer
+      renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.2;
+
+      // Controls
+      controls = new PointerLockControls(camera, document.body);
+
+      const overlay = document.getElementById('click-overlay');
+      overlay.addEventListener('click', () => { controls.lock(); });
+
+      controls.addEventListener('lock', () => {
+        overlay.classList.add('hidden');
+        document.getElementById('crosshair').style.display = 'block';
+        isLocked = true;
+      });
+
+      controls.addEventListener('unlock', () => {
+        if (!document.getElementById('furniture-sidebar').classList.contains('open')) {
+          overlay.classList.remove('hidden');
+        }
+        document.getElementById('crosshair').style.display = 'none';
+        isLocked = false;
+      });
+
+      // Lighting
+      const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+      scene.add(ambient);
+
+      const sunLight = new THREE.DirectionalLight(0xfff5e6, 1.2);
+      sunLight.position.set(5, 8, 3);
+      sunLight.castShadow = true;
+      sunLight.shadow.mapSize.set(2048, 2048);
+      sunLight.shadow.camera.near = 0.5;
+      sunLight.shadow.camera.far = 25;
+      sunLight.shadow.camera.left = -10;
+      sunLight.shadow.camera.right = 10;
+      sunLight.shadow.camera.top = 10;
+      sunLight.shadow.camera.bottom = -10;
+      scene.add(sunLight);
+
+      // Fill light from window side
+      const fillLight = new THREE.DirectionalLight(0xaaccff, 0.3);
+      fillLight.position.set(-3, 4, -2);
+      scene.add(fillLight);
+
+      // Build room
+      buildRoom();
+
+      // Keyboard
+      document.addEventListener('keydown', onKeyDown);
+      document.addEventListener('keyup', onKeyUp);
+
+      // Resize
+      window.addEventListener('resize', onResize);
+
+      // Minimap
+      const mmCanvas = document.getElementById('minimap-canvas');
+      mmCanvas.width = 150;
+      mmCanvas.height = 120;
+      minimapCtx = mmCanvas.getContext('2d');
+
+      // Render furniture sidebar
+      renderSidebar();
+
+      animate();
+    }
+
+    // ===== BUILD ROOM =====
+    function buildRoom() {
+      const textureLoader = new THREE.TextureLoader();
+
+      // Materials
+      const floorMat = new THREE.MeshStandardMaterial({
+        color: 0xC4A776,
+        roughness: 0.8,
+        metalness: 0.0,
+      });
+
+      // Create wood grain pattern on floor
+      const floorCanvas = document.createElement('canvas');
+      floorCanvas.width = 512;
+      floorCanvas.height = 512;
+      const fctx = floorCanvas.getContext('2d');
+      // Wood base
+      fctx.fillStyle = '#C4A776';
+      fctx.fillRect(0, 0, 512, 512);
+      // Planks
+      for (let i = 0; i < 8; i++) {
+        const y = i * 64;
+        fctx.strokeStyle = 'rgba(0,0,0,0.08)';
+        fctx.lineWidth = 2;
+        fctx.beginPath();
+        fctx.moveTo(0, y);
+        fctx.lineTo(512, y);
+        fctx.stroke();
+        // Wood grain
+        for (let j = 0; j < 20; j++) {
+          fctx.strokeStyle = `rgba(139,105,40,${Math.random()*0.06})`;
+          fctx.lineWidth = 1;
+          fctx.beginPath();
+          fctx.moveTo(0, y + Math.random() * 60);
+          fctx.bezierCurveTo(170, y + Math.random()*60, 340, y + Math.random()*60, 512, y + Math.random()*60);
+          fctx.stroke();
+        }
+      }
+      const floorTex = new THREE.CanvasTexture(floorCanvas);
+      floorTex.wrapS = floorTex.wrapT = THREE.RepeatWrapping;
+      floorTex.repeat.set(4, 3);
+      floorMat.map = floorTex;
+
+      const wallMat = new THREE.MeshStandardMaterial({ color: 0xF5F0E8, roughness: 0.9 });
+      const ceilingMat = new THREE.MeshStandardMaterial({ color: 0xFAFAFA, roughness: 0.9 });
+      const accentWallMat = new THREE.MeshStandardMaterial({ color: 0xE8E0D0, roughness: 0.9 });
+
+      // 2LDK Layout
+      // LDK: 8m x 5m (main room)
+      // Bedroom: 4m x 4m (right side)
+      // Bedroom2: 4m x 3m (far right)
+      // Hallway connecting
+
+      const ch = ROOM.ceilingHeight;
+
+      // === LDK (main room) ===
+      // Floor
+      const ldkFloor = new THREE.Mesh(new THREE.PlaneGeometry(8, 5), floorMat);
+      ldkFloor.rotation.x = -Math.PI / 2;
+      ldkFloor.position.set(0, 0, 0);
+      ldkFloor.receiveShadow = true;
+      scene.add(ldkFloor);
+
+      // Ceiling
+      const ldkCeiling = new THREE.Mesh(new THREE.PlaneGeometry(8, 5), ceilingMat);
+      ldkCeiling.rotation.x = Math.PI / 2;
+      ldkCeiling.position.set(0, ch, 0);
+      scene.add(ldkCeiling);
+
+      // Back wall (with window)
+      createWall(0, ch/2, -2.5, 8, ch, 0, wallMat, true);
+
+      // Front wall (with door opening)
+      createWall(-2.5, ch/2, 2.5, 3, ch, 0, wallMat); // left portion
+      createWall(2.5, ch/2, 2.5, 3, ch, 0, wallMat);  // right portion
+      // Door frame above
+      createWall(0, ch - 0.3, 2.5, 2, 0.6, 0, wallMat);
+
+      // Left wall
+      createWall(-4, ch/2, 0, 5, ch, Math.PI/2, accentWallMat);
+
+      // Right wall (partial - opening to bedroom)
+      createWall(4, ch/2, -0.75, 2, ch, Math.PI/2, wallMat);
+      createWall(4, ch/2, 2, 1, ch, Math.PI/2, wallMat);
+      // Above opening
+      createWall(4, ch - 0.3, 0.75, 1.5, 0.6, Math.PI/2, wallMat);
+
+      // === Bedroom ===
+      const brFloor = new THREE.Mesh(new THREE.PlaneGeometry(4, 4), floorMat.clone());
+      brFloor.rotation.x = -Math.PI / 2;
+      brFloor.position.set(6, 0, -0.5);
+      brFloor.receiveShadow = true;
+      scene.add(brFloor);
+
+      const brCeiling = new THREE.Mesh(new THREE.PlaneGeometry(4, 4), ceilingMat);
+      brCeiling.rotation.x = Math.PI / 2;
+      brCeiling.position.set(6, ch, -0.5);
+      scene.add(brCeiling);
+
+      // Bedroom walls
+      createWall(6, ch/2, -2.5, 4, ch, 0, wallMat, true); // back (window)
+      createWall(6, ch/2, 1.5, 4, ch, 0, wallMat);         // front
+      createWall(8, ch/2, -0.5, 4, ch, Math.PI/2, accentWallMat); // right
+
+      // === Kitchen counter in LDK ===
+      const counter = new THREE.Mesh(
+        new THREE.BoxGeometry(2.5, 0.9, 0.6),
+        new THREE.MeshStandardMaterial({ color: 0xEEEEEE, roughness: 0.3, metalness: 0.1 })
+      );
+      counter.position.set(-2.5, 0.45, -1.8);
+      counter.castShadow = true;
+      counter.receiveShadow = true;
+      scene.add(counter);
+
+      // Counter top (darker)
+      const counterTop = new THREE.Mesh(
+        new THREE.BoxGeometry(2.6, 0.04, 0.65),
+        new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.2, metalness: 0.3 })
+      );
+      counterTop.position.set(-2.5, 0.92, -1.8);
+      scene.add(counterTop);
+
+      // Sink
+      const sink = new THREE.Mesh(
+        new THREE.BoxGeometry(0.5, 0.02, 0.35),
+        new THREE.MeshStandardMaterial({ color: 0x888899, roughness: 0.1, metalness: 0.8 })
+      );
+      sink.position.set(-2.2, 0.93, -1.8);
+      scene.add(sink);
+
+      // === Baseboard along walls ===
+      const bbMat = new THREE.MeshStandardMaterial({ color: 0xDDDDD5, roughness: 0.7 });
+      // Back wall baseboard
+      const bb1 = new THREE.Mesh(new THREE.BoxGeometry(8, 0.08, 0.02), bbMat);
+      bb1.position.set(0, 0.04, -2.49);
+      scene.add(bb1);
+
+      // === Outdoor ground ===
+      const groundGeo = new THREE.PlaneGeometry(50, 50);
+      const groundMat = new THREE.MeshStandardMaterial({ color: 0x7CB68E, roughness: 1 });
+      const ground = new THREE.Mesh(groundGeo, groundMat);
+      ground.rotation.x = -Math.PI / 2;
+      ground.position.y = -0.01;
+      ground.receiveShadow = true;
+      scene.add(ground);
+
+      // Window light shafts
+      const windowLight = new THREE.SpotLight(0xFFF8E7, 0.8, 10, Math.PI / 4);
+      windowLight.position.set(0, ch, -2.5);
+      windowLight.target.position.set(0, 0, 0);
+      scene.add(windowLight);
+      scene.add(windowLight.target);
+    }
+
+    function createWall(x, y, z, width, height, rotY, material, hasWindow = false) {
+      if (hasWindow) {
+        // Wall with window - create 3 parts
+        const winW = 2.0, winH = 1.2;
+        const winY = 1.0;
+
+        // Left part
+        const leftW = (width - winW) / 2;
+        const left = new THREE.Mesh(new THREE.BoxGeometry(leftW, height, 0.12), material);
+        left.position.set(x - width/2 + leftW/2, y, z);
+        left.rotation.y = rotY;
+        left.castShadow = true;
+        scene.add(left);
+
+        // Right part
+        const right = new THREE.Mesh(new THREE.BoxGeometry(leftW, height, 0.12), material);
+        right.position.set(x + width/2 - leftW/2, y, z);
+        right.rotation.y = rotY;
+        right.castShadow = true;
+        scene.add(right);
+
+        // Above window
+        const aboveH = height - winY - winH;
+        if (aboveH > 0) {
+          const above = new THREE.Mesh(new THREE.BoxGeometry(winW, aboveH, 0.12), material);
+          above.position.set(x, y + height/2 - aboveH/2, z);
+          above.rotation.y = rotY;
+          scene.add(above);
+        }
+
+        // Below window
+        const below = new THREE.Mesh(new THREE.BoxGeometry(winW, winY, 0.12), material);
+        below.position.set(x, winY/2, z);
+        below.rotation.y = rotY;
+        scene.add(below);
+
+        // Window glass
+        const glass = new THREE.Mesh(
+          new THREE.PlaneGeometry(winW, winH),
+          new THREE.MeshStandardMaterial({
+            color: 0x88BBEE,
+            transparent: true,
+            opacity: 0.3,
+            roughness: 0,
+            metalness: 0.5,
+            side: THREE.DoubleSide,
+          })
+        );
+        glass.position.set(x, winY + winH/2, z);
+        glass.rotation.y = rotY;
+        scene.add(glass);
+
+        // Window frame
+        const frameMat = new THREE.MeshStandardMaterial({ color: 0xEEEEEE, roughness: 0.3 });
+        // Top
+        const ft = new THREE.Mesh(new THREE.BoxGeometry(winW + 0.08, 0.04, 0.14), frameMat);
+        ft.position.set(x, winY + winH, z);
+        ft.rotation.y = rotY;
+        scene.add(ft);
+        // Bottom (windowsill)
+        const fb = new THREE.Mesh(new THREE.BoxGeometry(winW + 0.1, 0.04, 0.2), frameMat);
+        fb.position.set(x, winY, z);
+        fb.rotation.y = rotY;
+        scene.add(fb);
+        // Vertical divider
+        const fv = new THREE.Mesh(new THREE.BoxGeometry(0.03, winH, 0.05), frameMat);
+        fv.position.set(x, winY + winH/2, z);
+        fv.rotation.y = rotY;
+        scene.add(fv);
+
       } else {
-        clearInterval(interval);
-        document.getElementById('loading-bar').style.width = '100%';
-
-        // Update viewer info
-        const layout = document.getElementById('input-layout').value || '2LDK';
-        const area = document.getElementById('input-area').value || '65';
-        const height = document.getElementById('input-height').value || '2.5';
-        document.getElementById('viewer-info').textContent = `${layout} / ${area}m² / 天井高${height}m`;
-
-        setTimeout(() => {
-          goToStep(2);
-          renderFurnitureList();
-        }, 500);
+        const wall = new THREE.Mesh(new THREE.BoxGeometry(width, height, 0.12), material);
+        wall.position.set(x, y, z);
+        wall.rotation.y = rotY;
+        wall.castShadow = true;
+        wall.receiveShadow = true;
+        scene.add(wall);
       }
-    }, 700);
-  }
-
-  // ===== NAVIGATION =====
-  function goToScreen(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-  }
-
-  function goToStep(step) {
-    if (step === 1) {
-      goToScreen('screen-1');
-    } else if (step === 2 || step === 3) {
-      goToScreen('screen-viewer');
-      if (step === 3) {
-        document.getElementById('furniture-panel').classList.remove('collapsed');
-      }
-    } else if (step === 4) {
-      goToScreen('screen-4');
     }
-    updateSteps();
-    setActiveStep(step);
-  }
 
-  function setActiveStep(step) {
-    document.querySelectorAll('.header-step').forEach(s => {
-      const sNum = parseInt(s.dataset.step);
-      if (sNum < step) {
-        s.classList.remove('active');
-        s.classList.add('done');
-      } else if (sNum === step) {
-        s.classList.add('active');
-        s.classList.remove('done');
+    // ===== PLACE FURNITURE 3D =====
+    function placeFurniture3D(f) {
+      const geo = new THREE.BoxGeometry(f.w, f.h, f.d);
+      const mat = new THREE.MeshStandardMaterial({
+        color: f.color,
+        roughness: 0.6,
+        metalness: 0.05,
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+
+      // Position based on type
+      const positions = {
+        sofa:   { x: 0,    z: 0.5  },
+        tv:     { x: 0,    z: -2.0 },
+        ctable: { x: 0,    z: -0.5 },
+        dining: { x: -2.5, z: 0.5  },
+        bed:    { x: 6.5,  z: -1.5 },
+        desk:   { x: 5,    z: 0.5  },
+        shelf:  { x: -3.7, z: -0.5 },
+        fridge: { x: -3.5, z: -2.0 },
+        washer: { x: -3.5, z: 1.5  },
+      };
+
+      const pos = positions[f.id] || { x: 0, z: 0 };
+      mesh.position.set(pos.x, f.h / 2, pos.z);
+      mesh.name = 'furniture_' + f.id;
+
+      scene.add(mesh);
+      placed[f.id] = mesh;
+    }
+
+    function removeFurniture3D(id) {
+      if (placed[id]) {
+        scene.remove(placed[id]);
+        placed[id].geometry.dispose();
+        placed[id].material.dispose();
+        delete placed[id];
+      }
+    }
+
+    // ===== SIDEBAR =====
+    function renderSidebar() {
+      const cats = document.getElementById('sidebar-cats');
+      const categories = [
+        { id: 'all', label: 'すべて' },
+        { id: 'living', label: 'リビング' },
+        { id: 'bedroom', label: '寝室' },
+        { id: 'dining', label: 'ダイニング' },
+        { id: 'other', label: 'その他' },
+      ];
+
+      cats.innerHTML = categories.map(c =>
+        `<button class="sidebar-cat ${c.id === currentCat ? 'active' : ''}" onclick="window.filterCat('${c.id}', this)">${c.label}</button>`
+      ).join('');
+
+      renderFurnitureList();
+    }
+
+    function renderFurnitureList() {
+      const list = document.getElementById('sidebar-list');
+      const filtered = currentCat === 'all' ? furnitureData : furnitureData.filter(f => f.cat === currentCat);
+
+      list.innerHTML = filtered.map(f => `
+        <div class="furn-card ${placed[f.id] ? 'placed' : ''}">
+          <div class="fc-icon">${f.icon}</div>
+          <div class="fc-name">${f.name}</div>
+          <div class="fc-size">${f.size}</div>
+          <button class="fc-btn" onclick="window.toggleFurniture('${f.id}')">${placed[f.id] ? '撤去' : '配置'}</button>
+        </div>
+      `).join('');
+    }
+
+    window.filterCat = (cat, btn) => {
+      currentCat = cat;
+      renderSidebar();
+    };
+
+    window.toggleFurniture = (id) => {
+      const f = furnitureData.find(d => d.id === id);
+      if (placed[id]) {
+        removeFurniture3D(id);
+        showToast(`${f.name} を撤去しました`);
       } else {
-        s.classList.remove('active');
-        s.classList.remove('done');
+        placeFurniture3D(f);
+        showToast(`${f.name} を配置しました`);
       }
-    });
+      renderFurnitureList();
+    };
 
-    // Show share button when on viewer
-    const shareBtn = document.querySelector('.header-share-btn');
-    shareBtn.classList.toggle('visible', step === 2 || step === 3);
-  }
+    window.toggleFurnitureSidebar = () => {
+      const sb = document.getElementById('furniture-sidebar');
+      const isOpen = sb.classList.toggle('open');
+      if (isOpen && isLocked) controls.unlock();
+    };
 
-  function updateStep(num, state) {
-    const step = document.querySelector(`.header-step[data-step="${num}"]`);
-    step.classList.remove('active', 'done');
-    step.classList.add(state);
-  }
+    window.resetPosition = () => {
+      camera.position.set(0, ROOM.eyeHeight, 4);
+      camera.rotation.set(0, 0, 0);
+      showToast('入口に戻りました');
+    };
 
-  function updateSteps() {
-    const hasFurniture = Object.keys(placed).length > 0;
-    if (hasFurniture) {
-      updateStep(3, 'done');
-    }
-  }
+    window.toggleMinimap = () => {
+      const mm = document.getElementById('minimap');
+      mm.style.display = mm.style.display === 'none' ? 'block' : 'none';
+    };
 
-  // Header step clicks
-  document.querySelectorAll('.header-step').forEach(s => {
-    s.addEventListener('click', () => {
-      const step = parseInt(s.dataset.step);
-      if (step === 1 || s.classList.contains('done') || s.classList.contains('active')) {
-        goToStep(step);
+    // ===== MOVEMENT =====
+    function onKeyDown(e) {
+      switch (e.code) {
+        case 'KeyW': case 'ArrowUp': moveForward = true; break;
+        case 'KeyS': case 'ArrowDown': moveBackward = true; break;
+        case 'KeyA': case 'ArrowLeft': moveLeft = true; break;
+        case 'KeyD': case 'ArrowRight': moveRight = true; break;
       }
-    });
-  });
-
-  // ===== SHARE =====
-  function copyLink() {
-    navigator.clipboard.writeText('https://roomcraft.app/view/demo-room-3f').catch(() => {});
-    showToast('リンクをコピーしました！');
-  }
-
-  // ===== TOAST =====
-  function showToast(msg) {
-    const toast = document.getElementById('toast');
-    toast.textContent = msg;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2000);
-  }
-
-  // ===== CANVAS ROTATION (mouse drag on room) =====
-  let canvasDown = false, canvasStartX = 0, canvasStartY = 0, rotX = 25, rotZ = -15;
-  const canvas = document.getElementById('room-canvas');
-
-  canvas.addEventListener('mousedown', (e) => {
-    if (e.target.closest('.furniture-3d')) return;
-    canvasDown = true;
-    canvasStartX = e.clientX;
-    canvasStartY = e.clientY;
-  });
-
-  document.addEventListener('mousemove', (e) => {
-    if (!canvasDown) return;
-    const dx = e.clientX - canvasStartX;
-    const dy = e.clientY - canvasStartY;
-    rotZ += dx * 0.3;
-    rotX = Math.max(10, Math.min(80, rotX - dy * 0.3));
-    canvasStartX = e.clientX;
-    canvasStartY = e.clientY;
-
-    const room = document.getElementById('room-3d');
-    if (!room.classList.contains('top-view')) {
-      room.style.transform = `translate(-50%, -50%) perspective(800px) rotateX(${rotX}deg) rotateZ(${rotZ}deg)`;
     }
-  });
 
-  document.addEventListener('mouseup', () => { canvasDown = false; });
-</script>
+    function onKeyUp(e) {
+      switch (e.code) {
+        case 'KeyW': case 'ArrowUp': moveForward = false; break;
+        case 'KeyS': case 'ArrowDown': moveBackward = false; break;
+        case 'KeyA': case 'ArrowLeft': moveLeft = false; break;
+        case 'KeyD': case 'ArrowRight': moveRight = false; break;
+      }
+    }
+
+    function onResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    // ===== MINIMAP =====
+    function drawMinimap() {
+      const ctx = minimapCtx;
+      if (!ctx) return;
+
+      ctx.fillStyle = '#111122';
+      ctx.fillRect(0, 0, 150, 120);
+
+      const scale = 10;
+      const ox = 35, oy = 65;
+
+      // LDK
+      ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(ox - 40, oy - 25, 80, 50);
+
+      // Bedroom
+      ctx.strokeRect(ox + 40, oy - 25, 40, 40);
+
+      // Labels
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      ctx.font = '8px sans-serif';
+      ctx.fillText('LDK', ox - 15, oy + 3);
+      ctx.fillText('BR', ox + 52, oy - 5);
+
+      // Player position
+      const px = ox + camera.position.x * scale;
+      const pz = oy + camera.position.z * scale;
+      ctx.fillStyle = '#FF6B35';
+      ctx.beginPath();
+      ctx.arc(px, pz, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Direction
+      const dir = new THREE.Vector3(0, 0, -1);
+      dir.applyQuaternion(camera.quaternion);
+      ctx.strokeStyle = '#FF6B35';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(px, pz);
+      ctx.lineTo(px + dir.x * 8, pz + dir.z * 8);
+      ctx.stroke();
+    }
+
+    // ===== ANIMATION LOOP =====
+    const clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const delta = clock.getDelta();
+
+      if (controls.isLocked) {
+        const speed = 4.0;
+
+        velocity.x -= velocity.x * 8.0 * delta;
+        velocity.z -= velocity.z * 8.0 * delta;
+
+        direction.z = Number(moveForward) - Number(moveBackward);
+        direction.x = Number(moveRight) - Number(moveLeft);
+        direction.normalize();
+
+        if (moveForward || moveBackward) velocity.z -= direction.z * speed * delta;
+        if (moveLeft || moveRight) velocity.x -= direction.x * speed * delta;
+
+        controls.moveRight(-velocity.x * delta * 20);
+        controls.moveForward(-velocity.z * delta * 20);
+
+        // Keep at eye height
+        camera.position.y = ROOM.eyeHeight;
+
+        // Simple boundary clamping
+        camera.position.x = Math.max(-3.8, Math.min(7.8, camera.position.x));
+        camera.position.z = Math.max(-2.3, Math.min(2.3, camera.position.z));
+      }
+
+      drawMinimap();
+      renderer.render(scene, camera);
+    }
+
+    // ===== SCREEN MANAGEMENT =====
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    window.startGenerate = () => {
+      showScreen('screen-loading');
+
+      const messages = [
+        { text: '図面を解析中...', sub: 'AIが間取り図を読み取っています', pct: 15 },
+        { text: '壁・窓を検出中...', sub: '部屋の構造を認識しています', pct: 35 },
+        { text: '3Dモデルを構築中...', sub: '空間を3次元に変換しています', pct: 60 },
+        { text: 'テクスチャを適用中...', sub: '床材・壁紙を設定しています', pct: 80 },
+        { text: '最終調整中...', sub: 'まもなく完了します', pct: 95 },
+      ];
+
+      let i = 0;
+      const interval = setInterval(() => {
+        if (i < messages.length) {
+          document.getElementById('loading-text').textContent = messages[i].text;
+          document.getElementById('loading-sub').textContent = messages[i].sub;
+          document.getElementById('loading-bar').style.width = messages[i].pct + '%';
+          i++;
+        } else {
+          clearInterval(interval);
+          document.getElementById('loading-bar').style.width = '100%';
+
+          const layout = document.getElementById('input-layout').value;
+          const area = document.getElementById('input-area').value;
+          document.getElementById('hud-info').textContent = `${layout} / ${area}m²`;
+
+          setTimeout(() => {
+            showScreen('viewer-screen');
+            init();
+          }, 500);
+        }
+      }, 700);
+    };
+
+    // ===== FILE UPLOAD =====
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('file-input');
+
+    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.style.borderColor = '#2D5BFF'; });
+    dropzone.addEventListener('dragleave', () => { dropzone.style.borderColor = ''; });
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', (e) => { if (e.target.files.length) handleFile(e.target.files[0]); });
+
+    function handleFile(file) {
+      dropzone.classList.add('has-file');
+      document.getElementById('dz-icon').textContent = '✅';
+      document.getElementById('dz-text').textContent = file.name;
+      document.getElementById('dz-hint').textContent = '選択済み';
+
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          document.getElementById('preview-img').src = e.target.result;
+          document.getElementById('upload-preview').classList.add('visible');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // ===== TOAST =====
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2000);
+    }
+    window.showToast = showToast;
+  </script>
 
 </body>
 </html>
